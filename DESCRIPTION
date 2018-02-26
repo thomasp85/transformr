@@ -1,0 +1,23 @@
+Package: transformr
+Type: Package
+Title: Polygon Transformations
+Version: 0.1.0
+Date: 2018-02-26
+Authors@R:
+    person(given = "Thomas Lin",
+           family = "Pedersen",
+           role = c("cre", "aut"),
+           email = "thomasp85@gmail.com")
+Maintainer: Thomas Lin Pedersen <thomasp85@gmail.com>
+Description: In order to smoothly animate the transformation of polygons, many
+    aspects needs to be taken into account, such as differing number of control
+    points, changing center of rotation, etc. The 'transformr' package provides
+    an extensive framework for manipulating the shapes of polygons and can be
+    seen as the spatial brother to the 'tweenr' package.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: Rcpp (>= 0.12.15)
+LinkingTo: Rcpp
+RoxygenNote: 6.0.1.9000
+Roxygen: list(markdown = TRUE)
