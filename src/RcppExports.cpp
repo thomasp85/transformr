@@ -45,11 +45,24 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// cut_polygon
+NumericMatrix cut_polygon(NumericMatrix polygon, int n);
+RcppExport SEXP _transformr_cut_polygon(SEXP polygonSEXP, SEXP nSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type polygon(polygonSEXP);
+    Rcpp::traits::input_parameter< int >::type n(nSEXP);
+    rcpp_result_gen = Rcpp::wrap(cut_polygon(polygon, n));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_transformr_find_splits", (DL_FUNC) &_transformr_find_splits, 2},
     {"_transformr_insert_points", (DL_FUNC) &_transformr_insert_points, 4},
     {"_transformr_rotate", (DL_FUNC) &_transformr_rotate, 4},
+    {"_transformr_cut_polygon", (DL_FUNC) &_transformr_cut_polygon, 2},
     {NULL, NULL, 0}
 };
 

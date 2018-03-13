@@ -12,6 +12,14 @@ points, changing center of rotation, etc. The 'transformr' package provides
 an extensive framework for manipulating the shapes of polygons and can be
 seen as the spatial brother to the 'tweenr' package.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/thomasp85/transformr}
+  \item Report bugs at \url{https://github.com/thomasp85/transformr/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Thomas Lin Pedersen \email{thomasp85@gmail.com}
 

@@ -13,3 +13,7 @@ rotate <- function(poly_x, poly_y, ref_x, ref_y) {
     .Call('_transformr_rotate', PACKAGE = 'transformr', poly_x, poly_y, ref_x, ref_y)
 }
 
+cut_polygon <- function(polygon, n) {
+    .Call('_transformr_cut_polygon', PACKAGE = 'transformr', polygon, n)
+}
+

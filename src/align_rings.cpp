@@ -16,6 +16,10 @@ IntegerVector find_splits(NumericVector lengths, int n) {
   int n_remain = n;
   j = 0;
   while (n_remain > 0) {
+    if (j >= splits.size()) {
+      splits[0] += n_remain;
+      break;
+    }
     int split = std::round(n * lengths[j] / total);
     if (split == 0) split = 1;
     split = split < n ? split : n;
