@@ -46,12 +46,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // cut_polygon
-NumericMatrix cut_polygon(NumericMatrix polygon, int n);
+NumericMatrix cut_polygon(ListOf<DataFrame> polygon, int n);
 RcppExport SEXP _transformr_cut_polygon(SEXP polygonSEXP, SEXP nSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericMatrix >::type polygon(polygonSEXP);
+    Rcpp::traits::input_parameter< ListOf<DataFrame> >::type polygon(polygonSEXP);
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     rcpp_result_gen = Rcpp::wrap(cut_polygon(polygon, n));
     return rcpp_result_gen;

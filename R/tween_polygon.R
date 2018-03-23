@@ -1,46 +1,234 @@
-#' @importFrom tweenr tween_states
+#' Transition between polygon data.frames
+#'
+#' This function is equivalent to [tweenr::tween_state()] except that data is
+#' interpeted as encoding polygons. Data is expected to have an `x` and `y`
+#' column encoding the location of corners in the polygon.
+#'
+#' @inheritParams tweenr::tween_state
+#' @param match Should polygons be matched by id? If `FALSE` then polygons will
+#' be matched by shortest distance and if any state has more polygons than the
+#' other, the other states polygons will be chopped up so the numbers match.
+#'
+#' @return A data.frame containing intermediary states
+#'
+#' @section Aligning polygons:
+#' `transformr` performs a lot of work to try to ensure the transition between
+#' different shapes are as smooth and direct as possible. The first operation is
+#' to ensure that the two end states of the polygon are both drawn clockwise, so
+#' that the transition will not contain an inversion. Second, we need to make
+#' sure that each end state is drawn with the same number of points. If not, the
+#' less detailed polygon will get points inserted at the longest edges so that
+#' the number is even between the two states. Third, we rotate the last state so
+#' as to minimize the cumulative distance between all point pairs, thus ensuring
+#' that the transition will involve a minimum of rotation.
+#'
+#' @section Cutting polygons:
+#' If the transition involves changing the number of polygons, there are two
+#' strategies: Making polygons appear/disappear to even out the number, or
+#' cutting up the polygons in the state with the fewest in order to create the
+#' same number of polygons for the transition. In the latter case, a choice have
+#' to be made with regards to which polygons to cut, into how many, and where to
+#' cut it. `transformr` will distribute the number of cuts among candidate
+#' polygons based on their relative area, ensuring that it is not necessarily
+#' the largest polygon that gets all the cuts, but that divisions are
+#' distributed as fairly as possible. For deciding on where to cut the polygons
+#' they are triangulated and the triangles are then reassembled into the number
+#' of pieces needed by always adding to the smallest piece.
+#'
+#' @section Polygon with holes:
+#' `transformr` support polygons with any number of holes. Holes are encoded by
+#' adding an `NA` row to the main enclosing polygon and appending the hole after
+#' that. Multiple holes are likewise added by simply separating them with `NA`
+#' rows. A hole might get cut up and disappear during transition if the polygon
+#' needs to be divided. When transitioning between polygons with holes the holes
+#' are matched by position to minimize the travel distance. If there is a
+#' mismatch between the number of holes in each end state then new zero-area
+#' holes are inserted in the centroid of the polygon with the fewest to even out
+#' the number.
+#'
+#' @export
+#' @importFrom tweenr tween_state .get_last_frame .with_prior_frames
 #' @importFrom rlang enquo quo_is_null quo eval_tidy
-tween_polygon <- function(.data, to, x = NULL, y = NULL, group = NULL, ease = 'linear', n_frames = 2, match = TRUE) {
+tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
   stopifnot(is.data.frame(.data))
-  xquo <- enquo(x)
-  if (quo_is_null(xquo)) xquo <- quo(x)
-  yquo <- enquo(y)
-  if (quo_is_null(yquo)) yquo <- quo(y)
-  groupquo <- enquo(group)
-  if (quo_is_null(groupquo)) groupquo <- quo(1)
-  from <- get_last_frame(.data)
-  from <- cbind(
-    eval_tidy(quo(data.frame(x = !!xquo, y = !!yquo, group = !!groupquo)), data = from),
-    from[, !names(from) %in% c('x', 'y', 'group'), drop = FALSE]
-  )
-  to <- cbind(
-    eval_tidy(quo(data.frame(x = !!xquo, y = !!yquo, group = !!groupquo)), data = to),
-    to[, !names(to) %in% c('x', 'y', 'group'), drop = FALSE]
-  )
-  polygons <- align(from, to, match = match)
-  polygons <- tween_states(polygons, tweenlength = 1, statelength = 0, ease = ease, nframes = n_frames - 1)
-  polygons <- polygons[!polygons$.frame %in% c(1, n_frames), , drop = FALSE]
+  from <- .get_last_frame(.data)
+  if (nrow(from) != nrow(.data)) nframes <- nframes + 1
+  polygons <- align_polygons(from, to, id = id, enter = enter, exit = exit, match = match)
+  polygons <- tween_state(polygons$from, polygons$to, ease = ease, nframes = nframes)
+  polygons <- polygons[!polygons$.frame %in% c(1, nframes), , drop = FALSE]
   morph <- rbind(
     cbind(from, .frame = 1),
     polygons,
-    cbind(to, .frame = n_frames)
+    cbind(to, .frame = nframes)
   )
-  with_prior_frames(.data, morph)
+  .with_prior_frames(.data, morph)
 }
 
-get_last_frame <- function(polygon) {
-  if ('.frame' %in% names(polygon)) {
-    polygon[polygon$.frame == max(polygon$.frame), names(polygon) != '.frame']
+align_polygons <- function(from, to, min_n = 50, id, enter, exit, match = TRUE) {
+  polygons <- if (match) {
+    prep_match_polygons(from, to, id)
   } else {
-    polygon
+    prep_align_polygons(from, to, id)
   }
+  polygons <- mapply(
+    match_shapes,
+    from = polygons$from,
+    to = polygons$to,
+    new_id = as.integer(names(polygons$from)),
+    MoreArgs = list(
+      id = id, enter = enter, exit = exit, min_n = min_n, closed = TRUE
+    ),
+    SIMPLIFY = FALSE
+  )
+  from <- do.call(rbind, lapply(polygons, `[[`, 'from'))
+  to <- do.call(rbind, lapply(polygons, `[[`, 'to'))
+  list(from = from, to = to)
 }
-with_prior_frames <- function(prior, morph) {
-  if ('.frame' %in% names(prior)) {
-    prior <- prior[prior$.frame != max(prior$.frame), , drop = FALSE]
-    morph$.frame <- morph$.frame + max(prior$.frame)
-    rbind(prior, morph)
+
+prep_match_polygons <- function(from, to, id) {
+  if (is.null(id)) {
+    from_id <- rep(1, nrow(from))
+    to_id <- rep(1, nrow(to))
   } else {
-    morph
+    from_id <- from[[id]]
+    to_id <- to[[id]]
   }
+  from <- lapply(split(from, from_id), as_clockwise)
+  to <- lapply(split(to, to_id), as_clockwise)
+  all_ids <- as.character(union(from_id, to_id))
+  from_all <- structure(rep(list(NULL), length(all_ids)), names = all_ids)
+  to_all <- from_all
+  from_all[names(from)] <- from
+  to_all[names(to)] <- to
+  list(from = from_all, to = to_all)
+}
+#' @importFrom sf st_sfc st_area st_distance st_centroid
+#' @importFrom lpSolve lp.assign
+prep_align_polygons <- function(from, to, id) {
+  if (is.null(id)) {
+    from_id <- rep(1, nrow(from))
+    to_id <- rep(1, nrow(to))
+  } else {
+    from_id <- from[[id]]
+    to_id <- to[[id]]
+  }
+  from <- lapply(split(from, from_id), as_clockwise)
+  to <- lapply(split(to, to_id), as_clockwise)
+  from_st <- st_sfc(lapply(from, to_polygon))
+  to_st <- st_sfc(lapply(to, to_polygon))
+  if (length(from) < length(to)) {
+    area <- st_area(from_st)
+    from <- divide_polygons(from, area, length(to) - length(from))
+    from_st <- st_sfc(lapply(from, to_polygon))
+  } else if (length(to) < length(from)) {
+    area <- st_area(to_st)
+    to <- divide_polygons(to, area, length(from) - length(to))
+    to_st <- st_sfc(lapply(to, to_polygon))
+  }
+  distance <- st_distance(st_centroid(from_st), st_centroid(to_st))
+  match_poly <- lp.assign(distance)
+  if (match_poly$status == 0) {
+    to <- to[apply(round(match_poly$solution) == 1, 1, which)]
+  }
+  names(from) <- as.character(seq_along(from))
+  names(to) <- as.character(seq_along(to))
+  list(from = from, to = to)
+}
+align_holes <- function(from, to) {
+  from_st <- st_sfc(lapply(from, function(x) to_polygon(list(x))))
+  to_st <- st_sfc(lapply(to, function(x) to_polygon(list(x))))
+  from_centroids <- st_centroid(from_st)
+  to_centroids <- st_centroid(to_st)
+  n_from <- length(from_st)
+  n_to <- length(to_st)
+  if (n_from < n_to) {
+    from_centroids <- from_centroids[c(seq_len(n_from), rep(1, n_to - n_from))]
+  }
+  if (n_from > n_to) {
+    to_centroids <- to_centroids[c(seq_len(n_to), rep(1, n_from - n_to))]
+  }
+  distance <- st_distance(from_centroids[-1], to_centroids[-1])
+  match_poly <- lp.assign(distance)
+  from <- from[seq_along(from_centroids)]
+  if (match_poly$status == 0) {
+    to <- to[c(1, apply(round(match_poly$solution) == 1, 1, which) + 1)]
+  } else {
+    to <- to[seq_along(to_centroids)]
+  }
+  holes <- Map(function(from, to) {
+    if (is.null(from)) {
+      from <- to
+      from$x <- from_centroids[[1]][1]
+      from$y <- from_centroids[[1]][2]
+    } else if (is.null(to)) {
+      to <- from
+      to$x <- to_centroids[[1]][1]
+      to$y <- to_centroids[[1]][2]
+    } else {
+      n_points <- max(nrow(from), nrow(to))
+      if (nrow(from) < n_points) from <- add_points(from, n_points - nrow(from))
+      if (nrow(to) < n_points) main_to <- add_points(to, n_points - nrow(to))
+      offset <- rotate(to$x, to$y, from$x, from$y)
+      to_end <- seq_len(nrow(to)) < offset
+      to <- rbind(to[!to_end, , drop = FALSE],
+                  to[to_end, , drop = FALSE])
+    }
+    list(from = from, to = to)
+  }, from = from[-1], to = to[-1])
+  list(from = lapply(holes, `[[`, 'from'), to = lapply(holes, `[[`, 'to'))
+}
+as_clockwise <- function(polygon) {
+  holes <- which(is.na(polygon$x))
+  if (length(holes) == 0) {
+    polygon <- list(polygon)
+  } else {
+    holes <- c(holes, nrow(polygon) + 1)
+    polygon <- polygon[-holes, , drop = FALSE]
+    polygon <- split(polygon, rep(seq_along(holes), diff(c(0, holes)) - 1))
+  }
+  lapply(polygon, function(p) {
+    x <- c(p$x, p$x[1])
+    y <- c(p$y, p$y[1])
+    area <- (x[-1] - x[-length(x)]) * (y[-1] + y[-length(y)])
+    if (sum(area) < 0) p <- p[rev(seq_len(nrow(p))), ]
+    p
+  })
+}
+#' @importFrom sf st_union st_multipolygon
+split_polygon <- function(polygon, n) {
+  if (n == 1) return(list(polygon))
+  n_points <- sum(vapply(polygon, nrow, integer(1)))
+  if (n_points < n + 2) polygon[[1]] <- add_points(polygon[[1]], n + 2 - n_points)
+  triangles <- as.data.frame(cut_polygon(lapply(polygon, as.matrix), n))
+  names(triangles) <- c('x', 'y', 'groups')
+  all_points <- do.call(rbind, polygon)
+  id <- paste0(all_points$x, '-', all_points$y)
+  lapply(split(triangles[, c('x', 'y')], triangles$groups), function(poly) {
+    tri <- split(poly, rep(seq_len(nrow(poly)/3), each = 3))
+    tri <- lapply(tri, function(x) list(as.matrix(x[c(1:3,1),])))
+    poly <- as.list(st_union(st_multipolygon(tri)))
+    lapply(poly, function(p) {
+      all_points[match(paste0(p[-nrow(p),1], '-' , p[-nrow(p),2]), id), , drop = FALSE]
+    })
+  })
+}
+divide_polygons <- function(polygons, area, n) {
+  biggest <- order(area, decreasing = TRUE)
+  n_splits <- find_splits(area[biggest], n)
+  splits <- n_splits[match(seq_along(area), biggest)] + 1
+  unlist(Map(split_polygon, polygon = polygons, n = splits), recursive = FALSE)
+}
+#' @importFrom sf st_polygon
+to_polygon <- function(points) {
+  points <- points[[1]]
+  if (is.data.frame(points)) {
+    points <- as.matrix(points[, c('x', 'y')])
+  } else {
+    points <- points[, 1:2]
+  }
+  if (anyNA(points)) {
+    first_na <- which(is.na(points[,1]))
+    points <- points[seq_len(first_na-1), , drop = FALSE]
+  }
+  st_polygon(list(rbind(points, points[1,])))
 }

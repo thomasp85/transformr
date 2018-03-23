@@ -16,12 +16,14 @@ Description: In order to smoothly animate the transformation of polygons, many
     seen as the spatial brother to the 'tweenr' package.
 License: MIT + file LICENSE
 Encoding: UTF-8
+SystemRequirements: C++11
 LazyData: true
 Imports: Rcpp (>= 0.12.15),
     tweenr,
     rlang,
     sf,
     lpSolve
+Remotes: thomasp85/tweenr
 LinkingTo: Rcpp
 RoxygenNote: 6.0.1.9000
 Roxygen: list(markdown = TRUE)

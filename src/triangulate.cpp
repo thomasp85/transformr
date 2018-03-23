@@ -39,26 +39,25 @@ double tri_area(Point A, Point B, Point C) {
 
 
 //[[Rcpp::export]]
-NumericMatrix cut_polygon(NumericMatrix polygon, int n) {
+NumericMatrix cut_polygon(ListOf<DataFrame> polygon, int n) {
   std::vector< std::vector<Point> > poly;
-  std::vector<Point> ring;
   std::vector<Point> all_points;
   int i,j;
 
-  for (i = 0; i < polygon.nrow(); ++i) {
-    Point corner;
-    corner.first = polygon(i, 0);
-    corner.second = polygon(i, 1);
-
-    if (R_IsNA(corner.first)) {
-      poly.push_back(ring);
-      ring = std::vector<Point>();
-    } else {
+  for (i = 0; i < polygon.size(); ++i) {
+    std::vector<Point> ring;
+    DataFrame df = polygon[i];
+    if (!(df.containsElementNamed("x") && df.containsElementNamed("y"))) {
+      stop("All polygons must contains an x and y column");
+    }
+    NumericVector x = df["x"], y = df["y"];
+    for (j = 0; j < df.nrow(); ++j) {
+      Point corner = {x[j], y[j]};
       ring.push_back(corner);
       all_points.push_back(corner);
     }
+    poly.push_back(ring);
   }
-  poly.push_back(ring);
 
   std::vector<N> triangle_ind = mapbox::earcut<N>(poly);
   std::vector<tri> triangles;
