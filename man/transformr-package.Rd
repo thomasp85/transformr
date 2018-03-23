@@ -6,11 +6,12 @@
 \alias{transformr-package}
 \title{transformr: Polygon Transformations}
 \description{
-In order to smoothly animate the transformation of polygons, many
-aspects needs to be taken into account, such as differing number of control
-points, changing center of rotation, etc. The 'transformr' package provides
-an extensive framework for manipulating the shapes of polygons and can be
-seen as the spatial brother to the 'tweenr' package.
+In order to smoothly animate the transformation of polygons and
+paths, many aspects needs to be taken into account, such as differing number
+of control points, changing center of rotation, etc. The 'transformr'
+package provides an extensive framework for manipulating the shapes of
+polygons and paths and can be seen as the spatial brother to the 'tweenr'
+package.
 }
 \seealso{
 Useful links:
