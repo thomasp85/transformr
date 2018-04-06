@@ -3,11 +3,14 @@ Type: Package
 Title: Polygon Transformations
 Version: 0.1.0
 Date: 2018-02-26
-Authors@R:
-    person(given = "Thomas Lin",
-           family = "Pedersen",
-           role = c("cre", "aut"),
-           email = "thomasp85@gmail.com")
+Authors@R: 
+    c(person(given = "Thomas Lin",
+             family = "Pedersen",
+             role = c("cre", "aut"),
+             email = "thomasp85@gmail.com"),
+      person(given = "Mapbox",
+             role = "aut",
+             comment = "Developer of earcut.hpp"))
 Maintainer: Thomas Lin Pedersen <thomasp85@gmail.com>
 Description: In order to smoothly animate the transformation of polygons and 
     paths, many aspects needs to be taken into account, such as differing number 
