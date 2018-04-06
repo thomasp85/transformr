@@ -93,3 +93,13 @@ holes are inserted in the centroid of the polygon with the fewest to even out
 the number.
 }
 
+\examples{
+library(magrittr)
+star <- poly_star_hole()
+circle <- poly_circle()
+circles <- poly_circles()
+
+tween_polygon(circle, star, 'cubic-in-out', 20) \%>\%
+  tween_polygon(circles, 'cubic-in-out', 20)
+
+}

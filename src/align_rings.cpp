@@ -22,7 +22,7 @@ IntegerVector find_splits(NumericVector lengths, int n) {
     }
     int split = std::round(n * lengths[j] / total);
     if (split == 0) split = 1;
-    split = split < n ? split : n;
+    split = split < n_remain ? split : n_remain;
     splits[j] = split;
     n_remain -= split;
     j++;

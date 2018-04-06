@@ -1,0 +1,134 @@
+#' Transition between data.frames containing sfc columns
+#'
+#' This function is equivalent to [tweenr::tween_state()] except that it
+#' understands [`sf::sfc`] columns, as defined by the `sf` package. An `sfc`
+#' column is a column containing simple features and can this hold both points,
+#' lines polygons and more. `tween_sf` currently has support for (multi)point,
+#' (multi)linestring, and (multi)polygon types and requires that the transition
+#' is between compatible types (points-to-points, linestring-to-linestring,
+#' polygon-to-polygon). For (multi)linestring and (multi)polygon, the behavior
+#' is similar to [tween_path()] and [tween_polygon()] respectively, with each
+#' feature beeing run through the respective function with `match = FALSE`. For
+#' (multi)points it behaves more or less like [tweenr::tween_state()] except
+#' additional points are added as needed to make the to stages contain the same
+#' number of points. Points are added on top of existing points so it appears as
+#' if the points are divided into more.
+#'
+#' @inheritParams tweenr::tween_state
+#'
+#' @return A data.frame containing intermediary states
+#'
+#' @importFrom tweenr .complete_states
+#' @export
+#'
+#' @examples
+#' library(magrittr)
+#' star <- poly_star(st = TRUE)
+#' circle <- poly_circle(st = TRUE)
+#' star_hole <- poly_star_hole(st = TRUE)
+#' circles <- poly_circles(st = TRUE)
+#'
+#' df1 <- data.frame(geo = sf::st_sfc(star, circle))
+#' df2 <- data.frame(geo = sf::st_sfc(circles, star_hole))
+#'
+#' tween_sf(df1, df2, 'linear', 30)
+#'
+tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL) {
+  stopifnot(is.data.frame(.data))
+  from <- .get_last_frame(.data)
+  if (nrow(from) != nrow(.data)) nframes <- nframes + 1
+
+  sf_columns <- vapply(from, inherits, logical(1), 'sfc')
+  if (!any(sf_columns)) return(tween_state(.data, to, ease, nframes, id, enter, exit))
+  full_set <- .complete_states(from, to, id, enter, exit)
+  sf_from <- full_set$from[, sf_columns, drop = FALSE]
+  sf_to <- full_set$to[, sf_columns, drop = FALSE]
+  full_set$from[, sf_columns] <- 1L
+  full_set$to[, sf_columns] <- 1L
+  morph <- tween_state(as.data.frame(full_set$from), as.data.frame(full_set$to), ease, nframes, id = NULL, enter, exit)
+  morph[which(sf_columns)] <- tween_sf_col(sf_from, sf_to, rep(ease, length.out = ncol(from))[sf_columns], nframes)
+  morph <- morph[!morph$.frame %in% c(1, nframes), , drop = FALSE]
+  morph <- rbind(
+    cbind(as.data.frame(from), .frame = 1),
+    morph,
+    cbind(as.data.frame(to), .frame = nframes)
+  )
+  .with_prior_frames(.data, morph)
+}
+#' @importFrom sf st_geometry_type st_sfc
+#' @importFrom tweenr tween_state
+tween_sf_col <- function(from, to, ease, nframes) {
+  lapply(seq_along(from), function(i) {
+    from_type <- as.character(unlist(lapply(from[[i]], st_geometry_type)))
+    if (!all(from_type %in% supp_types)) stop('Unsupported geometry type', call. = FALSE)
+    to_type <- as.character(unlist(lapply(to[[i]], st_geometry_type)))
+    if (!all(to_type %in% supp_types)) stop('Unsupported geometry type', call. = FALSE)
+    if (!all(sub('MULTI', '', from_type) == sub('MULTI', '', to_type))) stop('Incompatible geometry types', call. = FALSE)
+    from <- unpack_sf(from[[i]], from_type)
+    to <- unpack_sf(to[[i]], to_type)
+    aligned <- Map(function(from, to, type) {
+      switch(
+        type,
+        POINT =,
+        MULTIPOINT = align_sf_point(from, to),
+        LINESTRING =,
+        MULTILINESTRING = align_sf_path(from, to),
+        POLYGON =,
+        MULTIPOLYGON = align_sf_polygon(from, to, 50)
+      )
+    }, from = from, to = to, type = from_type)
+    from <- lapply(aligned, `[[`, 'from')
+    to <- lapply(aligned, `[[`, 'to')
+    id <- rep(seq_along(from), vapply(from, nrow, integer(1)))
+    from <- do.call(rbind, from)
+    to <- do.call(rbind, to)
+    from$sf_id <- id
+    to$sf_id <- id
+    tweened <- tween_state(from, to, ease, nframes)
+    st_sfc(repack_sf(tweened, from_type, nframes))
+  })
+}
+#' @importFrom sf st_multipoint st_distance
+#' @importFrom lpSolve lp.assign
+align_sf_point <- function(from, to) {
+  dist <- st_distance(st_multipoint(from), st_multipoint(to))
+  if (nrow(dist) < ncol(dist)) {
+    closest <- apply(dist, 1, min)
+    to_add <- order(closest)[seq_len(ncol(dist) - nrow(dist))]
+    dist <- rbind(dist, dist[to_add, , drop = FALSE])
+    from <- rbind(from, from[to_add, , drop = FALSE])
+  } else if (nrow(dist) > ncol(dist)) {
+    closest <- apply(dist, 2, min)
+    to_add <- order(closest)[seq_len(nrow(dist) - ncol(dist))]
+    dist <- cbind(dist, dist[, to_add, drop = FALSE])
+    to <- rbind(to, to[to_add, , drop = FALSE])
+  }
+  match_points <- lp.assign(dist)
+  if (match_points$status == 0) {
+    to <- to[apply(round(match_points$solution) == 1, 1, which)]
+  }
+  list(from = from, to = to)
+}
+align_sf_path <- function(from, to, min_n) {
+  prepped <- prep_align_paths(from, to)
+  match_shapes(prepped$from, prepped$to, seq_along(prepped$from), 'id', NULL, NULL, min_n, FALSE)
+}
+align_sf_polygon <- function(from ,to, min_n) {
+  from <- as_clockwise(from)
+  to <- as_clockwise(to)
+  prepped <- prep_align_polygons(from, to)
+  polygons <- mapply(
+    match_shapes,
+    from = prepped$from,
+    to = prepped$to,
+    new_id = seq_along(prepped$from),
+    MoreArgs = list(
+      id = 'id', enter = NULL, exit = NULL, min_n = min_n, closed = TRUE
+    ),
+    SIMPLIFY = FALSE
+  )
+  from <- do.call(rbind, lapply(polygons, `[[`, 'from'))
+  to <- do.call(rbind, lapply(polygons, `[[`, 'to'))
+  list(from = from, to = to)
+}
+supp_types <- c('POINT', 'LINESTRING', 'POLYGON', 'MULTIPOINT', 'MULTILINESTRING', 'MULTIPOLYGON')

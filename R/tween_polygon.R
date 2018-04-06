@@ -49,6 +49,16 @@
 #' @export
 #' @importFrom tweenr tween_state .get_last_frame .with_prior_frames
 #' @importFrom rlang enquo quo_is_null quo eval_tidy
+#'
+#' @examples
+#' library(magrittr)
+#' star <- poly_star_hole()
+#' circle <- poly_circle()
+#' circles <- poly_circles()
+#'
+#' tween_polygon(circle, star, 'cubic-in-out', 20) %>%
+#'   tween_polygon(circles, 'cubic-in-out', 20)
+#'
 tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
   stopifnot(is.data.frame(.data))
   from <- .get_last_frame(.data)
@@ -65,10 +75,12 @@ tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exi
 }
 
 align_polygons <- function(from, to, min_n = 50, id, enter, exit, match = TRUE) {
+  from <- lapply(make_polygons(from, id), as_clockwise)
+  to <- lapply(make_polygons(to, id), as_clockwise)
   polygons <- if (match) {
-    prep_match_polygons(from, to, id)
+    prep_match_polygons(from, to)
   } else {
-    prep_align_polygons(from, to, id)
+    prep_align_polygons(from, to)
   }
   polygons <- mapply(
     match_shapes,
@@ -85,17 +97,8 @@ align_polygons <- function(from, to, min_n = 50, id, enter, exit, match = TRUE) 
   list(from = from, to = to)
 }
 
-prep_match_polygons <- function(from, to, id) {
-  if (is.null(id)) {
-    from_id <- rep(1, nrow(from))
-    to_id <- rep(1, nrow(to))
-  } else {
-    from_id <- from[[id]]
-    to_id <- to[[id]]
-  }
-  from <- lapply(split(from, from_id), as_clockwise)
-  to <- lapply(split(to, to_id), as_clockwise)
-  all_ids <- as.character(union(from_id, to_id))
+prep_match_polygons <- function(from, to) {
+  all_ids <- as.character(union(names(from), names(to)))
   from_all <- structure(rep(list(NULL), length(all_ids)), names = all_ids)
   to_all <- from_all
   from_all[names(from)] <- from
@@ -104,16 +107,7 @@ prep_match_polygons <- function(from, to, id) {
 }
 #' @importFrom sf st_sfc st_area st_distance st_centroid
 #' @importFrom lpSolve lp.assign
-prep_align_polygons <- function(from, to, id) {
-  if (is.null(id)) {
-    from_id <- rep(1, nrow(from))
-    to_id <- rep(1, nrow(to))
-  } else {
-    from_id <- from[[id]]
-    to_id <- to[[id]]
-  }
-  from <- lapply(split(from, from_id), as_clockwise)
-  to <- lapply(split(to, to_id), as_clockwise)
+prep_align_polygons <- function(from, to) {
   from_st <- st_sfc(lapply(from, to_polygon))
   to_st <- st_sfc(lapply(to, to_polygon))
   if (length(from) < length(to)) {
@@ -133,6 +127,24 @@ prep_align_polygons <- function(from, to, id) {
   names(from) <- as.character(seq_along(from))
   names(to) <- as.character(seq_along(to))
   list(from = from, to = to)
+}
+make_polygons <- function(x, id) {
+  if (is.null(id)) {
+    id <- rep(1, nrow(x))
+  } else {
+    id <- x[[id]]
+  }
+  lapply(split(x, id), function(xx) {
+    holes <- which(is.na(xx$x))
+    if (length(holes) == 0) {
+      xx <- list(xx)
+    } else {
+      holes <- c(holes, nrow(xx) + 1)
+      xx <- xx[-holes, , drop = FALSE]
+      xx <- split(xx, rep(seq_along(holes), diff(c(0, holes)) - 1))
+    }
+    xx
+  })
 }
 align_holes <- function(from, to) {
   from_st <- st_sfc(lapply(from, function(x) to_polygon(list(x))))
@@ -178,14 +190,6 @@ align_holes <- function(from, to) {
   list(from = lapply(holes, `[[`, 'from'), to = lapply(holes, `[[`, 'to'))
 }
 as_clockwise <- function(polygon) {
-  holes <- which(is.na(polygon$x))
-  if (length(holes) == 0) {
-    polygon <- list(polygon)
-  } else {
-    holes <- c(holes, nrow(polygon) + 1)
-    polygon <- polygon[-holes, , drop = FALSE]
-    polygon <- split(polygon, rep(seq_along(holes), diff(c(0, holes)) - 1))
-  }
   lapply(polygon, function(p) {
     x <- c(p$x, p$x[1])
     y <- c(p$y, p$y[1])

@@ -45,6 +45,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// unpack_sf
+List unpack_sf(List sf, CharacterVector type);
+RcppExport SEXP _transformr_unpack_sf(SEXP sfSEXP, SEXP typeSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< List >::type sf(sfSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type type(typeSEXP);
+    rcpp_result_gen = Rcpp::wrap(unpack_sf(sf, type));
+    return rcpp_result_gen;
+END_RCPP
+}
+// repack_sf
+List repack_sf(DataFrame df, CharacterVector type, int n_frames);
+RcppExport SEXP _transformr_repack_sf(SEXP dfSEXP, SEXP typeSEXP, SEXP n_framesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< DataFrame >::type df(dfSEXP);
+    Rcpp::traits::input_parameter< CharacterVector >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< int >::type n_frames(n_framesSEXP);
+    rcpp_result_gen = Rcpp::wrap(repack_sf(df, type, n_frames));
+    return rcpp_result_gen;
+END_RCPP
+}
 // cut_polygon
 NumericMatrix cut_polygon(ListOf<DataFrame> polygon, int n);
 RcppExport SEXP _transformr_cut_polygon(SEXP polygonSEXP, SEXP nSEXP) {
@@ -62,6 +87,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_transformr_find_splits", (DL_FUNC) &_transformr_find_splits, 2},
     {"_transformr_insert_points", (DL_FUNC) &_transformr_insert_points, 4},
     {"_transformr_rotate", (DL_FUNC) &_transformr_rotate, 4},
+    {"_transformr_unpack_sf", (DL_FUNC) &_transformr_unpack_sf, 2},
+    {"_transformr_repack_sf", (DL_FUNC) &_transformr_repack_sf, 3},
     {"_transformr_cut_polygon", (DL_FUNC) &_transformr_cut_polygon, 2},
     {NULL, NULL, 0}
 };

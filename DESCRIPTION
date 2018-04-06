@@ -24,6 +24,7 @@ Imports: Rcpp (>= 0.12.15),
     rlang,
     sf,
     lpSolve
+Suggests: magrittr
 Remotes: thomasp85/tweenr
 LinkingTo: Rcpp
 RoxygenNote: 6.0.1.9000

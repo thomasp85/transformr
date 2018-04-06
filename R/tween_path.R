@@ -48,10 +48,12 @@ tween_path <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit =
 }
 
 align_paths <- function(from, to, min_n = 50, id, enter, exit, match) {
+  from <- make_paths(from, id)
+  to <- make_paths(to, id)
   paths <- if (match) {
-    prep_match_paths(from, to, id)
+    prep_match_paths(from, to)
   } else {
-    prep_align_paths(from, to, id)
+    prep_align_paths(from, to)
   }
   paths <- mapply(
     match_shapes,
@@ -67,17 +69,8 @@ align_paths <- function(from, to, min_n = 50, id, enter, exit, match) {
   to <- do.call(rbind, lapply(paths, `[[`, 'to'))
   list(from = from, to = to)
 }
-prep_match_paths <- function(from, to, id) {
-  if (is.null(id)) {
-    from_id <- rep(1, nrow(from))
-    to_id <- rep(1, nrow(to))
-  } else {
-    from_id <- from[[id]]
-    to_id <- to[[id]]
-  }
-  from <- lapply(split(from, from_id), to_path)
-  to <- lapply(split(to, to_id), to_path)
-  all_ids <- as.character(union(from_id, to_id))
+prep_match_paths <- function(from, to) {
+  all_ids <- as.character(union(names(from), names(to)))
   from_all <- structure(rep(list(NULL), length(all_ids)), names = all_ids)
   to_all <- from_all
   from_all[names(from)] <- from
@@ -93,17 +86,8 @@ prep_match_paths <- function(from, to, id) {
   to_all <- lapply(paths, `[[`, 'to')
   list(from = from_all, to = to_all)
 }
-prep_align_paths <- function(from, to, id) {
-  if (is.null(id)) {
-    from_id <- rep(1, nrow(from))
-    to_id <- rep(1, nrow(to))
-  } else {
-    from_id <- from[[id]]
-    to_id <- to[[id]]
-  }
-  from <- lapply(split(from, from_id), to_path)
+prep_align_paths <- function(from, to) {
   from <- unlist(from, recursive = FALSE)
-  to <- lapply(split(to, to_id), to_path)
   to <- unlist(to, recursive = FALSE)
   paths <- divide_paths(from, to)
   from <- paths$from
@@ -111,6 +95,14 @@ prep_align_paths <- function(from, to, id) {
   names(from) <- as.character(seq_along(from))
   names(to) <- as.character(seq_along(to))
   list(from = lapply(from, list), to = lapply(to, list))
+}
+make_paths <- function(x, id) {
+  if (is.null(id)) {
+    id <- rep(1, nrow(x))
+  } else {
+    id <- x[[id]]
+  }
+  lapply(split(x, id), to_path)
 }
 to_path <- function(path) {
   gaps <- which(is.na(path$x))
@@ -148,6 +140,7 @@ cut_lines <- function(lines, lengths, n) {
   unlist(lines, recursive = FALSE)
 }
 #' @importFrom sf st_length
+#' @importFrom lpSolve lp.assign
 divide_paths <- function(from, to) {
   from_st <- st_sfc(lapply(from, to_line))
   to_st <- st_sfc(lapply(to, to_line))

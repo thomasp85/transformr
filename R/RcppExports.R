@@ -13,6 +13,14 @@ rotate <- function(poly_x, poly_y, ref_x, ref_y) {
     .Call('_transformr_rotate', PACKAGE = 'transformr', poly_x, poly_y, ref_x, ref_y)
 }
 
+unpack_sf <- function(sf, type) {
+    .Call('_transformr_unpack_sf', PACKAGE = 'transformr', sf, type)
+}
+
+repack_sf <- function(df, type, n_frames) {
+    .Call('_transformr_repack_sf', PACKAGE = 'transformr', df, type, n_frames)
+}
+
 cut_polygon <- function(polygon, n) {
     .Call('_transformr_cut_polygon', PACKAGE = 'transformr', polygon, n)
 }
