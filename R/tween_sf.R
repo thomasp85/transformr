@@ -72,7 +72,7 @@ tween_sf_col <- function(from, to, ease, nframes) {
         POINT =,
         MULTIPOINT = align_sf_point(from, to),
         LINESTRING =,
-        MULTILINESTRING = align_sf_path(from, to),
+        MULTILINESTRING = align_sf_path(from, to, 50),
         POLYGON =,
         MULTIPOLYGON = align_sf_polygon(from, to, 50)
       )
@@ -111,7 +111,19 @@ align_sf_point <- function(from, to) {
 }
 align_sf_path <- function(from, to, min_n) {
   prepped <- prep_align_paths(from, to)
-  match_shapes(prepped$from, prepped$to, seq_along(prepped$from), 'id', NULL, NULL, min_n, FALSE)
+  polygons <- mapply(
+    match_shapes,
+    from = prepped$from,
+    to = prepped$to,
+    new_id = seq_along(prepped$from),
+    MoreArgs = list(
+      id = 'id', enter = NULL, exit = NULL, min_n = min_n, closed = FALSE
+    ),
+    SIMPLIFY = FALSE
+  )
+  from <- do.call(rbind, lapply(polygons, `[[`, 'from'))
+  to <- do.call(rbind, lapply(polygons, `[[`, 'to'))
+  list(from = from, to = to)
 }
 align_sf_polygon <- function(from ,to, min_n) {
   from <- as_clockwise(from)
