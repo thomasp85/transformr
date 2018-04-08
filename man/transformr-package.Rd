@@ -24,4 +24,9 @@ Useful links:
 \author{
 \strong{Maintainer}: Thomas Lin Pedersen \email{thomasp85@gmail.com}
 
+Authors:
+\itemize{
+  \item Mapbox (Developer of earcut.hpp)
+}
+
 }

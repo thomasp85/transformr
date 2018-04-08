@@ -59,13 +59,14 @@ if the points are divided into more.
 }
 \examples{
 library(magrittr)
-star <- poly_star(st = TRUE)
-circle <- poly_circle(st = TRUE)
 star_hole <- poly_star_hole(st = TRUE)
 circles <- poly_circles(st = TRUE)
-
-df1 <- data.frame(geo = sf::st_sfc(star, circle))
-df2 <- data.frame(geo = sf::st_sfc(circles, star_hole))
+spiral <- path_spiral(st = TRUE)
+waves <- path_waves(st = TRUE)
+random <- point_random(st = TRUE)
+grid <- point_grid(st = TRUE)
+df1 <- data.frame(geo = sf::st_sfc(star_hole, spiral, random))
+df2 <- data.frame(geo = sf::st_sfc(circles, waves, grid))
 
 tween_sf(df1, df2, 'linear', 30)
 
