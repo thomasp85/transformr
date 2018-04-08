@@ -68,3 +68,50 @@ poly_star_hole <- function(st = FALSE, n = 5, r1 = 0.5) {
     )
   }
 }
+#' @export
+path_spiral <- function(st = FALSE, windings = 5) {
+  n = 50 * windings
+  r = seq(0, 1, length.out = n)
+  i <- seq(0, 2*pi*windings, length.out = n+1)[-n-1]
+  x <- sin(i) * r
+  y <- cos(i) * r
+  if (st) {
+    st_linestring(cbind(x, y))
+  } else {
+    data.frame(x = x, y = y, id = 1L)
+  }
+}
+#' @export
+path_waves <- function(st = FALSE, w1 = 7, w2 = 11) {
+  x <- seq(-1, 1, length.out = 150)
+  y1 = 0.2*sin(w1*x) + 0.5
+  y2 = 0.2*sin(w2*x) - 0.5
+  if (st) {
+    st_multilinestring(list(
+      cbind(x, y1),
+      cbind(x, y2)
+    ))
+  } else {
+    data.frame(x = rep(x, 2), y = c(y1, y2), id = rep(c(1L, 2L), each = length(x)))
+  }
+}
+#' @export
+point_random <- function(st = FALSE, n = 10) {
+  x <- runif(10, min = -1, max = 1)
+  y <- runif(10, min = -1, max = 1)
+  if (st) {
+    st_multipoint(cbind(x, y))
+  } else {
+    data.frame(x = x, y = y, i = seq_len(n))
+  }
+}
+#' @export
+point_grid <- function(st = FALSE, dim = 5) {
+  x <- rep(seq(-1, 1, length.out = dim), each = dim)
+  y <- rep(seq(-1, 1, length.out = dim), dim)
+  if (st) {
+    st_multipoint(cbind(x, y))
+  } else {
+    data.frame(x = x, y = y, i = dim^2)
+  }
+}
