@@ -88,25 +88,29 @@ tween_sf_col <- function(from, to, ease, nframes) {
     st_sfc(repack_sf(tweened, from_type, nframes))
   })
 }
-#' @importFrom sf st_multipoint st_distance
+#' @importFrom sf st_point st_distance
 #' @importFrom lpSolve lp.assign
 align_sf_point <- function(from, to) {
-  dist <- st_distance(st_multipoint(from), st_multipoint(to))
+  f_st <- lapply(seq_len(nrow(from)), function(i) st_point(c(from$x[i], from$y[i])))
+  t_st <- lapply(seq_len(nrow(to)), function(i) st_point(c(to$x[i], to$y[i])))
+  dist <- st_distance(st_sfc(f_st), st_sfc(t_st))
   if (nrow(dist) < ncol(dist)) {
-    closest <- apply(dist, 1, min)
-    to_add <- order(closest)[seq_len(ncol(dist) - nrow(dist))]
+    closest <- apply(dist, 1, mean)
+    to_add <- rep(order(closest), length.out = ncol(dist) - nrow(dist))
     dist <- rbind(dist, dist[to_add, , drop = FALSE])
     from <- rbind(from, from[to_add, , drop = FALSE])
   } else if (nrow(dist) > ncol(dist)) {
-    closest <- apply(dist, 2, min)
-    to_add <- order(closest)[seq_len(nrow(dist) - ncol(dist))]
+    closest <- apply(dist, 2, mean)
+    to_add <- rep(order(closest), length.out = nrow(dist) - ncol(dist))
     dist <- cbind(dist, dist[, to_add, drop = FALSE])
     to <- rbind(to, to[to_add, , drop = FALSE])
   }
   match_points <- lp.assign(dist)
   if (match_points$status == 0) {
-    to <- to[apply(round(match_points$solution) == 1, 1, which)]
+    to <- to[apply(round(match_points$solution) == 1, 1, which), , drop = FALSE]
   }
+  from$id <- seq_len(nrow(from))
+  to$id <- from$id
   list(from = from, to = to)
 }
 align_sf_path <- function(from, to, min_n) {
