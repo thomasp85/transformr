@@ -96,6 +96,7 @@ path_waves <- function(st = FALSE, w1 = 7, w2 = 11) {
   }
 }
 #' @export
+#' @importFrom sf st_multipoint
 point_random <- function(st = FALSE, n = 10) {
   x <- runif(10, min = -1, max = 1)
   y <- runif(10, min = -1, max = 1)
@@ -106,6 +107,7 @@ point_random <- function(st = FALSE, n = 10) {
   }
 }
 #' @export
+#' @importFrom sf st_multipoint
 point_grid <- function(st = FALSE, dim = 5) {
   x <- rep(seq(-1, 1, length.out = dim), each = dim)
   y <- rep(seq(-1, 1, length.out = dim), dim)
