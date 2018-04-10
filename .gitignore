@@ -6,3 +6,5 @@ src/*.o
 src/*.so
 src/*.dll
 transformr.Rproj
+README_cache
+man/figures/*.jpeg
