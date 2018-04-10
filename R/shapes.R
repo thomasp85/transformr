@@ -27,6 +27,7 @@
 #' # Create a 7-pointed star
 #' poly_star(n = 7)
 #'
+NULL
 
 #' @rdname simple_shapes
 #' @export
@@ -74,7 +75,7 @@ poly_circles <- function(st = FALSE, n = 3, r = 0.25, detail = 360) {
 #' @rdname simple_shapes
 #' @export
 poly_star <- function(st = FALSE, n = 5, r1 = 0.5) {
-  d <- poly_circle(n = n*2)
+  d <- poly_circle(detail = n*2)
   d$x[c(FALSE, TRUE)] <- d$x[c(FALSE, TRUE)] * r1
   d$y[c(FALSE, TRUE)] <- d$y[c(FALSE, TRUE)] * r1
   if (st) {
