@@ -203,7 +203,7 @@ split_polygon <- function(polygon, n) {
   if (n == 1) return(list(polygon))
   n_points <- sum(vapply(polygon, nrow, integer(1)))
   if (n_points < n + 2) polygon[[1]] <- add_points(polygon[[1]], n + 2 - n_points)
-  triangles <- as.data.frame(cut_polygon(lapply(polygon, as.matrix), n))
+  triangles <- as.data.frame(cut_polygon(polygon, n))
   names(triangles) <- c('x', 'y', 'groups')
   all_points <- do.call(rbind, polygon)
   id <- paste0(all_points$x, '-', all_points$y)
