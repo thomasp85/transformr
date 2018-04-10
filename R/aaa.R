@@ -21,13 +21,15 @@ add_points <- function(polygon, n, connect = TRUE) {
 match_shapes <- function(from, to, new_id, id, enter, exit, min_n, closed = TRUE) {
   if (is.null(from)) {
     if (is.null(enter)) {
-      to <- NULL
+      from <- list(to[[1]][0, , drop = FALSE])
+      to <- from
     } else {
       from <- lapply(to, enter)
     }
   } else if (is.null(to)) {
     if (is.null(exit)) {
-      from <- NULL
+      to <- list(from[[1]][0, , drop = FALSE])
+      from <- to
     } else {
       to <- lapply(from, exit)
     }
@@ -40,7 +42,7 @@ match_shapes <- function(from, to, new_id, id, enter, exit, min_n, closed = TRUE
   to <- do.call(rbind, lapply(to, function(x) x[seq_len(nrow(x) + 1), ]))
   from <- from[-nrow(from), ]
   to <- to[-nrow(to), ]
-  if (!is.null(id)) {
+  if (!is.null(id) && nrow(from) > 0) {
     from[[id]] <- new_id
     to[[id]] <- new_id
   }
