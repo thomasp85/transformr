@@ -18,7 +18,7 @@
 #'
 #' @return A data.frame containing intermediary states
 #'
-#' @importFrom tweenr .complete_states
+#' @importFrom tweenr .complete_states .max_id
 #' @export
 #'
 #' @examples
@@ -37,11 +37,15 @@
 tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL) {
   stopifnot(is.data.frame(.data))
   from <- .get_last_frame(.data)
+  from$.phase <- 'raw'
+  to$.phase <- 'raw'
+  to$.id <- NA_integer_
   if (nrow(from) != nrow(.data)) nframes <- nframes + 1
 
   sf_columns <- vapply(from, inherits, logical(1), 'sfc')
   if (!any(sf_columns)) return(tween_state(.data, to, ease, nframes, id, enter, exit))
-  full_set <- .complete_states(from, to, id, enter, exit)
+  full_set <- .complete_states(from, to, id, enter, exit, .max_id(.data))
+  to$.id <- full_set$orig_to
   sf_from <- full_set$from[, sf_columns, drop = FALSE]
   sf_to <- full_set$to[, sf_columns, drop = FALSE]
   full_set$from[, sf_columns] <- 1L
@@ -54,7 +58,7 @@ tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = N
     morph,
     cbind(as.data.frame(to), .frame = nframes)
   )
-  .with_prior_frames(.data, morph)
+  .with_prior_frames(.data, morph, nframes)
 }
 #' @importFrom sf st_geometry_type st_sfc
 #' @importFrom tweenr tween_state

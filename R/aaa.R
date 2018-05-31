@@ -24,14 +24,22 @@ match_shapes <- function(from, to, new_id, id, enter, exit, min_n, closed = TRUE
       from <- list(to[[1]][0, , drop = FALSE])
       to <- from
     } else {
-      from <- lapply(to, enter)
+      from <- lapply(to, function(x) {
+        x <- enter(x)
+        x$.phase <- 'enter'
+        x
+      })
     }
   } else if (is.null(to)) {
     if (is.null(exit)) {
       to <- list(from[[1]][0, , drop = FALSE])
       from <- to
     } else {
-      to <- lapply(from, exit)
+      to <- lapply(from, function(x) {
+        x <- enter(x)
+        x$.phase <- 'exit'
+        x
+      })
     }
   } else {
     matched <- if (closed) match_polygon(from, to, min_n) else match_path(from, to, min_n)

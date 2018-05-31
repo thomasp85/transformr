@@ -62,16 +62,21 @@
 tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
   stopifnot(is.data.frame(.data))
   from <- .get_last_frame(.data)
+  from$.id <- from[[id]]
+  from$.phase <- 'raw'
+  to$.id <- to[[id]]
+  to$.phase <- 'raw'
   if (nrow(from) != nrow(.data)) nframes <- nframes + 1
   polygons <- align_polygons(from, to, id = id, enter = enter, exit = exit, match = match)
   polygons <- tween_state(polygons$from, polygons$to, ease = ease, nframes = nframes)
   polygons <- polygons[!polygons$.frame %in% c(1, nframes), , drop = FALSE]
+  polygons$.id <- polygons[[id]]
   morph <- rbind(
     cbind(from, .frame = 1),
     polygons,
     cbind(to, .frame = nframes)
   )
-  .with_prior_frames(.data, morph)
+  .with_prior_frames(.data, morph, nframes)
 }
 
 align_polygons <- function(from, to, min_n = 50, id, enter, exit, match = TRUE) {
