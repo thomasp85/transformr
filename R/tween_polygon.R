@@ -124,6 +124,8 @@ prep_align_polygons <- function(from, to) {
     to <- divide_polygons(to, area, length(from) - length(to))
     to_st <- st_sfc(lapply(to, to_polygon))
   }
+  from_st <- st_normalize(from_st)
+  to_st <- st_normalize(to_st)
   distance <- st_distance(st_centroid(from_st), st_centroid(to_st))
   area_diff <- abs(outer(st_area(from_st), st_area(to_st), `-`))
   distance <- distance * (1 + area_diff / max(area_diff))
@@ -244,4 +246,38 @@ to_polygon <- function(points) {
     points <- points[seq_len(first_na-1), , drop = FALSE]
   }
   st_polygon(list(rbind(points, points[1,])))
+}
+#' Normalise a geometry to fit inside a unit square
+#'
+#' This is a small helper function that will take an sf geometry and fit it
+#' inside the unit square (a square centered on 0 and ranging from -1 to 1 in
+#' both dimensions). The function will retain the aspect ratio of the geometry
+#' and simply scale it down until it fits.
+#'
+#' @param st An sf geometry such as `sf`, `sfc`, or `sfg`
+#'
+#' @return An object of the same type as `st`
+#'
+#' @importFrom sf st_bbox st_geometry
+#' @export
+#'
+#' @examples
+#' library(sf)
+#' nc <- st_read(system.file("shape/nc.shp", package="sf"), quiet = TRUE)
+#' st_bbox(nc)
+#'
+#' nc_norm <- st_normalize(nc)
+#' st_bbox(nc_norm)
+#'
+st_normalize <- function(st) {
+  if (inherits(st, 'sf')) {
+    st_geometry(st) <- st_normalize(st_geometry(st))
+    st
+  } else {
+    bbox <- st_bbox(st)
+    x <- bbox$xmin + (bbox$xmax - bbox$xmin) / 2
+    y <- bbox$ymin + (bbox$ymax - bbox$ymin) / 2
+    st <- st - c(x, y)
+    st / (0.5 * max(bbox$xmax - bbox$xmin, bbox$ymax - bbox$ymin))
+  }
 }
