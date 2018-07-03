@@ -42,8 +42,8 @@ List insert_points(NumericVector x, NumericVector y, IntegerVector splits, int n
     new_y.push_back(y[i]);
     if (splits[i] == 0) continue;
     next_i = i == x.size() - 1 ? 0 : i + 1;
-    x_seg = (x[next_i] - x[i]) / splits[i];
-    y_seg = (y[next_i] - y[i]) / splits[i];
+    x_seg = (x[next_i] - x[i]) / (splits[i] + 1);
+    y_seg = (y[next_i] - y[i]) / (splits[i] + 1);
     for (j = 1; j <= splits[i]; ++j) {
       new_x.push_back(x[i] + x_seg * j);
       new_y.push_back(y[i] + y_seg * j);
