@@ -9,7 +9,7 @@ Shelter<SEXP> shelter;
 
 //[[Rcpp::export]]
 List unpack_sf(List sf, CharacterVector type) {
-  std::vector<SEXP> res;
+  List res(sf.size());
   int i;
   for (i = 0; i < sf.size(); ++i) {
     if (type[i] == "POINT") {
@@ -18,37 +18,36 @@ List unpack_sf(List sf, CharacterVector type) {
         _["x"] = coord[0],
         _["y"] = coord[1]
       );
-      res.push_back(new_coord);
+      res[i] = new_coord;
     } else if (type[i] == "MULTIPOINT") {
       NumericMatrix coord = sf[i];
       DataFrame new_coord = DataFrame::create(
         _["x"] = coord(_, 0),
         _["y"] = coord(_, 1)
       );
-      res.push_back(new_coord);
+      res[i] = new_coord;
     } else if (type[i] == "LINESTRING") {
       NumericMatrix coord = sf[i];
       DataFrame new_coord = DataFrame::create(
         _["x"] = coord(_, 0),
         _["y"] = coord(_, 1)
       );
-      res.push_back(List::create(List::create(new_coord)));
+      res[i] = List::create(List::create(new_coord));
     } else if (type[i] == "MULTILINESTRING") {
       List coord_list = sf[i];
-      std::vector<List> new_coord_list;
+      List new_coord_list(coord_list.size());
       for (int j = 0; j < coord_list.size(); ++j) {
         NumericMatrix coord = coord_list[j];
         DataFrame new_coord = DataFrame::create(
           _["x"] = coord(_, 0),
           _["y"] = coord(_, 1)
         );
-        new_coord_list.push_back(List::create(new_coord));
+        new_coord_list[j] = List::create(new_coord);
       }
-      List final_coord_list = wrap(new_coord_list);
-      res.push_back(final_coord_list);
+      res[i] = new_coord_list;
     } else if (type[i] == "POLYGON") {
       List coord_list = sf[i];
-      std::vector<DataFrame> new_coord_list;
+      List new_coord_list(coord_list.size());
       for (int j = 0; j < coord_list.size(); ++j) {
         NumericMatrix coord = coord_list[j];
         coord = coord(Range(0, coord.nrow() - 2), _);
@@ -56,16 +55,15 @@ List unpack_sf(List sf, CharacterVector type) {
           _["x"] = coord(_, 0),
           _["y"] = coord(_, 1)
         );
-        new_coord_list.push_back(new_coord);
+        new_coord_list[j] = new_coord;
       }
-      List final_coord_list = wrap(new_coord_list);
-      res.push_back(List::create(final_coord_list));
+      res[i] = List::create(new_coord_list);
     } else if (type[i] == "MULTIPOLYGON") {
       List coord_list = sf[i];
-      std::vector<List> new_coord_list;
+      List new_coord_list(coord_list.size());
       for (int j = 0; j < coord_list.size(); ++j) {
         List polygon = coord_list[j];
-        std::vector<DataFrame> new_polygon;
+        List new_polygon(polygon.size());
         for (int k = 0; k < polygon.size(); ++k) {
           NumericMatrix coord = polygon[k];
           coord = coord(Range(0, coord.nrow() - 2), _);
@@ -73,17 +71,16 @@ List unpack_sf(List sf, CharacterVector type) {
             _["x"] = coord(_, 0),
             _["y"] = coord(_, 1)
           );
-          new_polygon.push_back(new_coord);
+          new_polygon[k] = new_coord;
         }
-        new_coord_list.push_back(wrap(new_polygon));
+        new_coord_list[j] = new_polygon;
       }
-      List final_coord_list = wrap(new_coord_list);
-      res.push_back(final_coord_list);
+      res[i] = new_coord_list;
     } else {
       stop("Unknown geometry type");
     }
   }
-  return wrap(res);
+  return res;
 }
 NumericMatrix make_point(NumericVector &x, NumericVector &y, std::vector< std::vector<int> > &start) {
   int first = start[0][0];
