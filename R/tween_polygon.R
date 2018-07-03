@@ -195,12 +195,14 @@ align_holes <- function(from, to) {
   list(from = lapply(holes, `[[`, 'from'), to = lapply(holes, `[[`, 'to'))
 }
 as_clockwise <- function(polygon) {
-  lapply(polygon, function(p) {
-    x <- c(p$x, p$x[1])
-    y <- c(p$y, p$y[1])
-    area <- (x[-1] - x[-length(x)]) * (y[-1] + y[-length(y)])
-    if (sum(area) < 0) p <- p[rev(seq_len(nrow(p))), ]
-    p
+  lapply(polygon, function(poly) {
+    lapply(poly, function(p) {
+      x <- c(p$x, p$x[1])
+      y <- c(p$y, p$y[1])
+      area <- (x[-1] - x[-length(x)]) * (y[-1] + y[-length(y)])
+      if (sum(area) < 0) p <- p[rev(seq_len(nrow(p))), ]
+      p
+    })
   })
 }
 #' @importFrom sf st_union st_multipolygon
