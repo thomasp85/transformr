@@ -80,8 +80,8 @@ tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exi
 }
 
 align_polygons <- function(from, to, min_n = 50, id, enter, exit, match = TRUE) {
-  from <- lapply(make_polygons(from, id), as_clockwise)
-  to <- lapply(make_polygons(to, id), as_clockwise)
+  from <- lapply(make_polygons(from, id), function(x) as_clockwise(list(x))[[1]])
+  to <- lapply(make_polygons(to, id), function(x) as_clockwise(list(x))[[1]])
   polygons <- if (match) {
     prep_match_polygons(from, to)
   } else {
