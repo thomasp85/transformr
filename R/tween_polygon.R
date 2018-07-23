@@ -126,12 +126,14 @@ prep_align_polygons <- function(from, to) {
   }
   from_st <- st_normalize(from_st)
   to_st <- st_normalize(to_st)
-  distance <- st_distance(st_centroid(from_st), st_centroid(to_st))
-  area_diff <- abs(outer(st_area(from_st), st_area(to_st), `-`))
-  distance <- distance * (1 + area_diff / max(area_diff))
-  match_poly <- lp.assign(distance)
-  if (match_poly$status == 0) {
-    to <- to[apply(round(match_poly$solution) == 1, 1, which)]
+  if (length(from_st) != 1 && length(to_st) != 1) {
+    distance <- st_distance(st_centroid(from_st), st_centroid(to_st))
+    area_diff <- abs(outer(st_area(from_st), st_area(to_st), `-`))
+    if (max(area_diff) > 0) distance <- distance * (1 + area_diff / max(area_diff))
+    match_poly <- lp.assign(distance)
+    if (match_poly$status == 0) {
+      to <- to[apply(round(match_poly$solution) == 1, 1, which)]
+    }
   }
   names(from) <- as.character(seq_along(from))
   names(to) <- as.character(seq_along(to))
