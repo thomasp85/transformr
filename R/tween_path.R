@@ -158,12 +158,16 @@ divide_paths <- function(from, to) {
     to <- cut_lines(to, l, length(from) - length(to))
     to_st <- st_sfc(lapply(to, to_line))
   }
-  from_length <- st_length(from_st)
-  to_length <- st_length(to_st)
-  l_diff <- abs(outer(from_length/max(from_length), to_length/max(to_length), `-`))
-  match_poly <- lp.assign(l_diff)
-  if (match_poly$status == 0) {
-    to <- to[apply(round(match_poly$solution) == 1, 1, which)]
+  from_st <- st_normalize(from_st)
+  to_st <- st_normalize(to_st)
+  if (length(from_st) != 1 && length(to_st) != 1) {
+    distance <- st_distance(st_centroid(from_st), st_centroid(to_st))
+    length_diff <- abs(outer(st_length(from_st), st_length(to_st), `-`))
+    if (max(length_diff) > 0) distance <- distance * (1 + length_diff / max(length_diff))
+    match_poly <- lp.assign(distance)
+    if (match_poly$status == 0) {
+      to <- to[apply(round(match_poly$solution) == 1, 1, which)]
+    }
   }
   list(from = from, to = to)
 }
