@@ -73,7 +73,7 @@ Similar to the `enter` function it is possible to supply an `exit` function when
 
 > The `enter` and `exit` functions have slightly different semantics here than in `tweenr::tween_state()` where it gets all entering/exiting rows in one go, and not one-by-one
 
-Our last option is to not match the polygons up, but simply say "make everything in the first state, into everything in the last state... somehow". This involves cutting up polygons in the state with fewest polygons and match polygons by minimizing the distance between pairs. All of this is controlled by setting `match = FALSE` in `tween_polygon()`, and `transformr` will then do its magic:
+Our last option is to not match the polygons up, but simply say "make everything in the first state, into everything in the last state... somehow". This involves cutting up polygons in the state with fewest polygons and match polygons by minimizing the distance and area difference between pairs. All of this is controlled by setting `match = FALSE` in `tween_polygon()`, and `transformr` will then do its magic:
 
 ``` r
 animation <- tween_polygon(star, circles, 'cubic-in-out', 40, 'id', match = FALSE) %>% 
@@ -86,7 +86,7 @@ ani <- lapply(split(animation, animation$.frame), polyplot)
 
 ### Paths
 
-Paths are a lot like polygons, except that they don't *wrap-around*. Still, slight differences in how they are tweened exists. Chief among these are that the winding order are not changed to minimize the travel-distance, because paths often have an implicit direction and this should not be tampered with. Further, when automatic matching paths (that is, `match = FALSE`), paths are matched to minimize the difference in length, not minimizing the pair distance. This has been chosen as extreme changes in path length are deemed to be more confusing than long traveling distance. The same interpretation of the `enter`, `exit`, and `match` arguments remain, which can be seen in the two examples below:
+Paths are a lot like polygons, except that they don't *wrap-around*. Still, slight differences in how they are tweened exists. Chief among these are that the winding order are not changed to minimize the travel-distance, because paths often have an implicit direction and this should not be tampered with. Further, when automatic matching paths (that is, `match = FALSE`), paths are matched to minimize the difference in length as well as the pair distance. The same interpretation of the `enter`, `exit`, and `match` arguments remain, which can be seen in the two examples below:
 
 ``` r
 pathplot <- function(data) {
