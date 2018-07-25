@@ -35,9 +35,9 @@
 tween_path <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
   stopifnot(is.data.frame(.data))
   from <- .get_last_frame(.data)
-  from$.id <- if (is.null(id)) 1L else from[[id]]
+  from$.id <- if (is.null(id)) 1L else match(from[[id]], unique(from[[id]]))
   from$.phase <- 'raw'
-  to$.id <- if (is.null(id)) 1L else to[[id]]
+  to$.id <- if (is.null(id)) 1L else match(to[[id]], unique(to[[id]]))
   to$.phase <- 'raw'
   if (nrow(from) != nrow(.data)) nframes <- nframes + 1
   paths <- align_paths(from, to, id = id, enter = enter, exit = exit, match = match)
@@ -132,7 +132,7 @@ to_line <- function(path) {
 cut_lines <- function(lines, lengths, n) {
   longest <- order(lengths, decreasing = TRUE)
   n_splits <- find_splits(lengths[longest], n)
-  splits <- n_splits[match(seq_along(length), longest)] + 1
+  splits <- n_splits[match(seq_along(lengths), longest)] + 1
   lines <- Map(function(path, n) {
     if (n == 1) return(list(path))
     if (n > nrow(path) - 1) path <- add_points(path, n - nrow(path) + 1, FALSE)

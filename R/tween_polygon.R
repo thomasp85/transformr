@@ -62,9 +62,9 @@
 tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
   stopifnot(is.data.frame(.data))
   from <- .get_last_frame(.data)
-  from$.id <- if (is.null(id)) 1L else from[[id]]
+  from$.id <- if (is.null(id)) 1L else match(from[[id]], unique(from[[id]]))
   from$.phase <- 'raw'
-  to$.id <- if (is.null(id)) 1L else to[[id]]
+  to$.id <- if (is.null(id)) 1L else match(to[[id]], unique(to[[id]]))
   to$.phase <- 'raw'
   if (nrow(from) != nrow(.data)) nframes <- nframes + 1
   polygons <- align_polygons(from, to, id = id, enter = enter, exit = exit, match = match)
