@@ -37,9 +37,9 @@
 tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL) {
   stopifnot(is.data.frame(.data))
   from <- .get_last_frame(.data)
-  from$.phase <- 'raw'
-  to$.phase <- 'raw'
-  to$.id <- NA_integer_
+  from$.phase <- rep('raw', nrow(from))
+  to$.phase <- rep('raw', nrow(to))
+  to$.id <- rep(NA_integer_, nrow(to))
   if (nrow(from) != nrow(.data)) nframes <- nframes + 1
 
   sf_columns <- vapply(from, inherits, logical(1), 'sfc')

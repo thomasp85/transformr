@@ -35,15 +35,15 @@
 tween_path <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
   stopifnot(is.data.frame(.data))
   from <- .get_last_frame(.data)
-  from$.id <- if (is.null(id)) 1L else match(from[[id]], unique(from[[id]]))
-  from$.phase <- 'raw'
-  to$.id <- if (is.null(id)) 1L else match(to[[id]], unique(to[[id]]))
-  to$.phase <- 'raw'
+  from$.id <- if (is.null(id)) rep(1L, nrow(from)) else match(from[[id]], unique(from[[id]]))
+  from$.phase <- rep('raw', nrow(from))
+  to$.id <- if (is.null(id)) rep(1L, nrow(to)) else match(to[[id]], unique(to[[id]]))
+  to$.phase <- rep('raw', nrow(to))
   if (nrow(from) != nrow(.data)) nframes <- nframes + 1
   paths <- align_paths(from, to, id = id, enter = enter, exit = exit, match = match)
   paths <- tween_state(paths$from, paths$to, ease = ease, nframes = nframes)
   paths <- paths[!paths$.frame %in% c(1, nframes), , drop = FALSE]
-  paths$.id <- if (is.null(id)) 1L else paths[[id]]
+  paths$.id <- if (is.null(id)) rep(1L, nrow(paths)) else paths[[id]]
   morph <- rbind(
     cbind(from, .frame = 1),
     paths,

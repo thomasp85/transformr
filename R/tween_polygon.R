@@ -62,15 +62,15 @@
 tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
   stopifnot(is.data.frame(.data))
   from <- .get_last_frame(.data)
-  from$.id <- if (is.null(id)) 1L else match(from[[id]], unique(from[[id]]))
-  from$.phase <- 'raw'
-  to$.id <- if (is.null(id)) 1L else match(to[[id]], unique(to[[id]]))
-  to$.phase <- 'raw'
+  from$.id <- if (is.null(id)) rep(1L, nrow(from)) else match(from[[id]], unique(from[[id]]))
+  from$.phase <- rep('raw', nrow(from))
+  to$.id <- if (is.null(id)) rep(1L, nrow(to)) else match(to[[id]], unique(to[[id]]))
+  to$.phase <- rep('raw', nrow(to))
   if (nrow(from) != nrow(.data)) nframes <- nframes + 1
   polygons <- align_polygons(from, to, id = id, enter = enter, exit = exit, match = match)
   polygons <- tween_state(polygons$from, polygons$to, ease = ease, nframes = nframes)
   polygons <- polygons[!polygons$.frame %in% c(1, nframes), , drop = FALSE]
-  polygons$.id <- if (is.null(id)) 1L else polygons[[id]]
+  polygons$.id <- if (is.null(id)) rep(1L, nrow(polygons)) else polygons[[id]]
   morph <- rbind(
     cbind(from, .frame = 1),
     polygons,
@@ -212,21 +212,56 @@ as_clockwise <- function(polygon) {
   })
 }
 #' @importFrom sf st_union st_multipolygon
+# split_polygon <- function(polygon, n) {
+#   if (n == 1) return(list(polygon))
+#   n_points <- sum(vapply(polygon, nrow, integer(1)))
+#   if (n_points < n + 2) polygon[[1]] <- add_points(polygon[[1]], n + 2 - n_points)
+#   triangles <- as.data.frame(cut_polygon(polygon, n))
+#   names(triangles) <- c('x', 'y', 'groups')
+#   all_points <- do.call(rbind, polygon)
+#   id <- paste0(all_points$x, '-', all_points$y)
+#   lapply(split(triangles[, c('x', 'y')], triangles$groups), function(poly) {
+#     tri <- split(poly, rep(seq_len(nrow(poly)/3), each = 3))
+#     tri <- lapply(tri, function(x) list(as.matrix(x[c(1:3,1),])))
+#     poly <- as.list(st_union(st_multipolygon(tri)))
+#     lapply(poly, function(p) {
+#       all_points[match(paste0(p[-nrow(p),1], '-' , p[-nrow(p),2]), id), , drop = FALSE]
+#     })
+#   })
+# }
+#' @importFrom sf st_polygon st_sample st_combine st_intersection st_cast st_voronoi st_as_sfc st_bbox st_sfc st_area st_touches st_union
 split_polygon <- function(polygon, n) {
-  if (n == 1) return(list(polygon))
-  n_points <- sum(vapply(polygon, nrow, integer(1)))
-  if (n_points < n + 2) polygon[[1]] <- add_points(polygon[[1]], n + 2 - n_points)
-  triangles <- as.data.frame(cut_polygon(polygon, n))
-  names(triangles) <- c('x', 'y', 'groups')
+  poly <- st_polygon(lapply(polygon, function(p) cbind(p$x, p$y)[c(seq_len(nrow(p)), 1), ]))
+  rand <- st_sample(poly, n)
+  while (length(rand) < n) {
+    rand <- c(rand, st_sample(poly, n))
+  }
+  rand <- st_combine(rand[sample(length(rand), n)])
+  tiles <- st_intersection(st_cast(st_voronoi(rand, st_as_sfc(st_bbox(poly)))), poly)
+  tiles <- unlist(lapply(tiles, function(x) {
+    if (inherits(x, 'MULTIPOLYGON')) {
+      lapply(x, st_polygon)
+    } else {
+      list(x)
+    }
+  }), recursive = FALSE)
+  while (length(tiles) > n) {
+    st_tiles <- st_sfc(tiles)
+    smallest <- which.min(st_area(st_tiles))
+    touches <- st_touches(st_tiles[smallest], st_tiles)
+    neighbor <- touches[[1]][1]
+    combined <- st_union(tiles[[smallest]], tiles[[neighbor]])
+    tiles <- c(tiles[-c(smallest, neighbor)], list(combined))
+  }
   all_points <- do.call(rbind, polygon)
   id <- paste0(all_points$x, '-', all_points$y)
-  lapply(split(triangles[, c('x', 'y')], triangles$groups), function(poly) {
-    tri <- split(poly, rep(seq_len(nrow(poly)/3), each = 3))
-    tri <- lapply(tri, function(x) list(as.matrix(x[c(1:3,1),])))
-    poly <- as.list(st_union(st_multipolygon(tri)))
-    lapply(poly, function(p) {
-      all_points[match(paste0(p[-nrow(p),1], '-' , p[-nrow(p),2]), id), , drop = FALSE]
-    })
+  lapply(tiles, function(t) {
+    x <- t[[1]][-nrow(t[[1]]), 1]
+    y <- t[[1]][-nrow(t[[1]]), 2]
+    tile <- all_points[match(paste0(x, '-' , y), id), , drop = FALSE]
+    tile$x <- x
+    tile$y <- y
+    list(tile)
   })
 }
 divide_polygons <- function(polygons, area, n) {
