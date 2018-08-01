@@ -36,7 +36,7 @@ match_shapes <- function(from, to, new_id, id, enter, exit, min_n, closed = TRUE
       from <- to
     } else {
       to <- lapply(from, function(x) {
-        x <- enter(x)
+        x <- exit(x)
         x$.phase <- 'exit'
         x
       })
