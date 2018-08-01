@@ -12,10 +12,26 @@ add_points <- function(polygon, n, connect = TRUE) {
   splits <- n_splits[match(seq_along(l), longest)]
   if (!connect) splits <- c(splits, 0)
   new_points <- insert_points(polygon$x, polygon$y, splits, n)
-  polygon <- polygon[rep(seq_len(nrow(polygon)), splits + 1), ]
-  polygon$x <- new_points$x
-  polygon$y <- new_points$y
-  polygon
+  new_polygon <- polygon[rep(seq_len(nrow(polygon)), splits + 1), ]
+  new_polygon$x <- new_points$x
+  new_polygon$y <- new_points$y
+  if ('ymin' %in% names(polygon) && length(unique(polygon$ymin)) > 1) {
+    new_points <- insert_points(polygon$x, polygon$ymin, splits, n)
+    new_polygon$ymin <- new_points$y
+  }
+  if ('ymax' %in% names(polygon) && length(unique(polygon$ymax)) > 1) {
+    new_points <- insert_points(polygon$x, polygon$ymax, splits, n)
+    new_polygon$ymax <- new_points$y
+  }
+  if ('xmin' %in% names(polygon) && length(unique(polygon$xmin)) > 1) {
+    new_points <- insert_points(polygon$xmin, polygon$y, splits, n)
+    new_polygon$xmin <- new_points$x
+  }
+  if ('xmax' %in% names(polygon) && length(unique(polygon$xmax)) > 1) {
+    new_points <- insert_points(polygon$xmax, polygon$y, splits, n)
+    new_polygon$xmax <- new_points$x
+  }
+  new_polygon
 }
 
 match_shapes <- function(from, to, new_id, id, enter, exit, min_n, closed = TRUE) {
