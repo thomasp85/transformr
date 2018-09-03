@@ -4,8 +4,8 @@
 \alias{tween_path}
 \title{Transition between path data frames}
 \usage{
-tween_path(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL,
-  match = TRUE)
+tween_path(.data, to, ease, nframes, id = NULL, enter = NULL,
+  exit = NULL, match = TRUE)
 }
 \arguments{
 \item{.data}{A data.frame to start from. If \code{.data} is the result of a prior

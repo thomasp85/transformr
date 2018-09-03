@@ -34,7 +34,7 @@ add_points <- function(polygon, n, connect = TRUE) {
   new_polygon
 }
 
-match_shapes <- function(from, to, new_id, id, enter, exit, min_n, closed = TRUE) {
+match_shapes <- function(from, to, enter, exit, min_n, closed = TRUE) {
   if (is.null(from)) {
     if (is.null(enter)) {
       from <- list(to[[1]][0, , drop = FALSE])
@@ -66,10 +66,6 @@ match_shapes <- function(from, to, new_id, id, enter, exit, min_n, closed = TRUE
   to <- do.call(rbind, lapply(to, function(x) x[seq_len(nrow(x) + 1), ]))
   from <- from[-nrow(from), ]
   to <- to[-nrow(to), ]
-  if (!is.null(id) && nrow(from) > 0) {
-    from[[id]] <- new_id
-    to[[id]] <- new_id
-  }
   list(from = from, to = to)
 }
 match_polygon <- function(from, to, min_n) {
@@ -99,4 +95,12 @@ match_path <- function(from, to, min_n) {
     list(from = from, to = to)
   }, from = from, to = to)
   list(from = lapply(paths, `[[`, 'from'), to = lapply(paths, `[[`, 'to'))
+}
+common_id <- function(from, to) {
+  from_id <- as.character(from$.id)
+  to_id <- as.character(to$.id)
+  all_id <- unique(c(from_id, to_id))
+  from$.id <- match(from_id, all_id)
+  to$.id <- match(to_id, all_id)
+  list(from = from, to = to)
 }

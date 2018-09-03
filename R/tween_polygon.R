@@ -48,7 +48,7 @@
 #'
 #' @export
 #' @importFrom tweenr tween_state .get_last_frame .with_prior_frames
-#' @importFrom rlang enquo quo_is_null quo eval_tidy
+#' @importFrom rlang enquo quo_is_null quo eval_tidy %||%
 #'
 #' @examples
 #' library(magrittr)
@@ -62,15 +62,16 @@
 tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
   stopifnot(is.data.frame(.data))
   from <- .get_last_frame(.data)
-  from$.id <- if (is.null(id)) rep(1L, nrow(from)) else match(from[[id]], unique(from[[id]]))
+  id <- enquo(id)
+  from$.id <- eval_tidy(id, from) %||% rep(1L, nrow(from))
   from$.phase <- rep('raw', nrow(from))
-  to$.id <- if (is.null(id)) rep(1L, nrow(to)) else match(to[[id]], unique(to[[id]]))
+  to$.id <- eval_tidy(id, to) %||% rep(1L, nrow(to))
   to$.phase <- rep('raw', nrow(to))
   if (nrow(from) != nrow(.data)) nframes <- nframes + 1
-  polygons <- align_polygons(from, to, id = id, enter = enter, exit = exit, match = match)
+  polygons <- align_polygons(from, to, enter = enter, exit = exit, match = match)
   polygons <- tween_state(polygons$from, polygons$to, ease = ease, nframes = nframes)
   polygons <- polygons[!polygons$.frame %in% c(1, nframes), , drop = FALSE]
-  polygons$.id <- if (is.null(id)) rep(1L, nrow(polygons)) else polygons[[id]]
+  polygons$.id <- if (quo_is_null(id)) rep(1L, nrow(polygons)) else eval_tidy(id, polygons)
   morph <- rbind(
     cbind(from, .frame = 1),
     polygons,
@@ -79,9 +80,9 @@ tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exi
   .with_prior_frames(.data, morph, nframes)
 }
 
-align_polygons <- function(from, to, min_n = 50, id, enter, exit, match = TRUE) {
-  from <- lapply(make_polygons(from, id), function(x) as_clockwise(list(x))[[1]])
-  to <- lapply(make_polygons(to, id), function(x) as_clockwise(list(x))[[1]])
+align_polygons <- function(from, to, min_n = 50, enter, exit, match = TRUE) {
+  from <- lapply(make_polygons(from), function(x) as_clockwise(list(x))[[1]])
+  to <- lapply(make_polygons(to), function(x) as_clockwise(list(x))[[1]])
   polygons <- if (match) {
     prep_match_polygons(from, to)
   } else {
@@ -91,15 +92,14 @@ align_polygons <- function(from, to, min_n = 50, id, enter, exit, match = TRUE) 
     match_shapes,
     from = polygons$from,
     to = polygons$to,
-    new_id = as.integer(names(polygons$from)),
     MoreArgs = list(
-      id = id, enter = enter, exit = exit, min_n = min_n, closed = TRUE
+      enter = enter, exit = exit, min_n = min_n, closed = TRUE
     ),
     SIMPLIFY = FALSE
   )
   from <- do.call(rbind, lapply(polygons, `[[`, 'from'))
   to <- do.call(rbind, lapply(polygons, `[[`, 'to'))
-  list(from = from, to = to)
+  common_id(from = from, to = to)
 }
 
 prep_match_polygons <- function(from, to) {
@@ -139,13 +139,8 @@ prep_align_polygons <- function(from, to) {
   names(to) <- as.character(seq_along(to))
   list(from = from, to = to)
 }
-make_polygons <- function(x, id) {
-  if (is.null(id)) {
-    id <- rep(1, nrow(x))
-  } else {
-    id <- x[[id]]
-  }
-  lapply(split(x, id), function(xx) {
+make_polygons <- function(x) {
+  lapply(split(x, x$.id), function(xx) {
     holes <- which(is.na(xx$x))
     if (length(holes) == 0) {
       xx <- list(xx)

@@ -19,6 +19,7 @@
 #' @return A data.frame containing intermediary states
 #'
 #' @importFrom tweenr .complete_states .max_id
+#' @importFrom rlang enquo
 #' @export
 #'
 #' @examples
@@ -40,10 +41,11 @@ tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = N
   from$.phase <- rep('raw', nrow(from))
   to$.phase <- rep('raw', nrow(to))
   to$.id <- rep(NA_integer_, nrow(to))
+  id <- enquo(id)
   if (nrow(from) != nrow(.data)) nframes <- nframes + 1
 
   sf_columns <- vapply(from, inherits, logical(1), 'sfc')
-  if (!any(sf_columns)) return(tween_state(.data, to, ease, nframes, id, enter, exit))
+  if (!any(sf_columns)) return(tween_state(.data, to, ease, nframes, !!id, enter, exit))
   full_set <- .complete_states(from, to, id, enter, exit, .max_id(.data))
   to$.id <- full_set$orig_to
   sf_from <- full_set$from[, sf_columns, drop = FALSE]

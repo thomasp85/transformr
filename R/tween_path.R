@@ -31,19 +31,21 @@
 #' by id all paths within a multipath will transition into the (multi)path that
 #' has the same id in the other state.
 #'
+#' @importFrom rlang enquo quo_is_null eval_tidy %||%
 #' @export
 tween_path <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
   stopifnot(is.data.frame(.data))
   from <- .get_last_frame(.data)
-  from$.id <- if (is.null(id)) rep(1L, nrow(from)) else match(from[[id]], unique(from[[id]]))
+  id <- enquo(id)
+  from$.id <- eval_tidy(id, from) %||% rep(1L, nrow(from))
   from$.phase <- rep('raw', nrow(from))
-  to$.id <- if (is.null(id)) rep(1L, nrow(to)) else match(to[[id]], unique(to[[id]]))
+  to$.id <- eval_tidy(id, to) %||% rep(1L, nrow(to))
   to$.phase <- rep('raw', nrow(to))
   if (nrow(from) != nrow(.data)) nframes <- nframes + 1
-  paths <- align_paths(from, to, id = id, enter = enter, exit = exit, match = match)
+  paths <- align_paths(from, to, enter = enter, exit = exit, match = match)
   paths <- tween_state(paths$from, paths$to, ease = ease, nframes = nframes)
   paths <- paths[!paths$.frame %in% c(1, nframes), , drop = FALSE]
-  paths$.id <- if (is.null(id)) rep(1L, nrow(paths)) else paths[[id]]
+  paths$.id <- if (quo_is_null(id)) rep(1L, nrow(paths)) else eval_tidy(id, paths)
   morph <- rbind(
     cbind(from, .frame = 1),
     paths,
@@ -52,9 +54,9 @@ tween_path <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit =
   .with_prior_frames(.data, morph, nframes)
 }
 
-align_paths <- function(from, to, min_n = 50, id, enter, exit, match) {
-  from <- make_paths(from, id)
-  to <- make_paths(to, id)
+align_paths <- function(from, to, min_n = 50, enter, exit, match) {
+  from <- make_paths(from)
+  to <- make_paths(to)
   paths <- if (match) {
     prep_match_paths(from, to)
   } else {
@@ -64,15 +66,14 @@ align_paths <- function(from, to, min_n = 50, id, enter, exit, match) {
     match_shapes,
     from = paths$from,
     to = paths$to,
-    new_id = as.integer(names(paths$from)),
     MoreArgs = list(
-      id = id, enter = enter, exit = exit, min_n = min_n, closed = FALSE
+      enter = enter, exit = exit, min_n = min_n, closed = FALSE
     ),
     SIMPLIFY = FALSE
   )
   from <- do.call(rbind, lapply(paths, `[[`, 'from'))
   to <- do.call(rbind, lapply(paths, `[[`, 'to'))
-  list(from = from, to = to)
+  common_id(from = from, to = to)
 }
 prep_match_paths <- function(from, to) {
   all_ids <- as.character(union(names(from), names(to)))
@@ -101,13 +102,8 @@ prep_align_paths <- function(from, to) {
   names(to) <- as.character(seq_along(to))
   list(from = lapply(from, list), to = lapply(to, list))
 }
-make_paths <- function(x, id) {
-  if (is.null(id)) {
-    id <- rep(1, nrow(x))
-  } else {
-    id <- x[[id]]
-  }
-  lapply(split(x, id), to_path)
+make_paths <- function(x) {
+  lapply(split(x, x$.id), to_path)
 }
 to_path <- function(path) {
   gaps <- which(is.na(path$x))
