@@ -50,15 +50,15 @@ tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = N
   to$.id <- full_set$orig_to
   sf_from <- full_set$from[, sf_columns, drop = FALSE]
   sf_to <- full_set$to[, sf_columns, drop = FALSE]
-  full_set$from[, sf_columns] <- 1L
-  full_set$to[, sf_columns] <- 1L
-  morph <- tween_state(as.data.frame(full_set$from), as.data.frame(full_set$to), ease, nframes, id = NULL, enter, exit)
+  full_set$from[, sf_columns] <- rep(1L, nrow(full_set$from))
+  full_set$to[, sf_columns] <- rep(1L, nrow(full_set$to))
+  morph <- tween_state(as.data.frame(full_set$from),as.data.frame(full_set$to), ease, nframes, id = NULL, enter, exit)
   morph[which(sf_columns)] <- tween_sf_col(sf_from, sf_to, rep(ease, length.out = ncol(from))[sf_columns], nframes)
   morph <- morph[!morph$.frame %in% c(1, nframes), , drop = FALSE]
   morph <- rbind(
-    cbind(as.data.frame(from), .frame = 1),
+    cbind(as.data.frame(from), .frame = rep(1, nrow(from))),
     morph,
-    cbind(as.data.frame(to), .frame = nframes)
+    cbind(as.data.frame(to), .frame = rep(nframes, nrow(to)))
   )
   .with_prior_frames(.data, morph, nframes)
 }
@@ -66,6 +66,7 @@ tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = N
 #' @importFrom tweenr tween_state
 tween_sf_col <- function(from, to, ease, nframes) {
   lapply(seq_along(from), function(i) {
+    if (length(from[[i]]) == 0 && length(to[[i]]) == 0) return(st_sfc(list()))
     from_type <- as.character(unlist(lapply(from[[i]], st_geometry_type)))
     if (!all(from_type %in% supp_types)) stop('Unsupported geometry type', call. = FALSE)
     to_type <- as.character(unlist(lapply(to[[i]], st_geometry_type)))

@@ -47,9 +47,9 @@ tween_path <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit =
   paths <- paths[!paths$.frame %in% c(1, nframes), , drop = FALSE]
   paths$.id <- if (quo_is_null(id)) rep(1L, nrow(paths)) else eval_tidy(id, paths)
   morph <- rbind(
-    cbind(from, .frame = 1),
+    cbind(from, .frame = rep(1, nrow(from))),
     paths,
-    cbind(to, .frame = nframes)
+    cbind(to, .frame = rep(nframes, nrow(to)))
   )
   .with_prior_frames(.data, morph, nframes)
 }

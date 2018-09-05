@@ -73,9 +73,9 @@ tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exi
   polygons <- polygons[!polygons$.frame %in% c(1, nframes), , drop = FALSE]
   polygons$.id <- if (quo_is_null(id)) rep(1L, nrow(polygons)) else eval_tidy(id, polygons)
   morph <- rbind(
-    cbind(from, .frame = 1),
+    cbind(from, .frame = rep(1, nrow(from))),
     polygons,
-    cbind(to, .frame = nframes)
+    cbind(to, .frame = rep(nframes, nrow(to)))
   )
   .with_prior_frames(.data, morph, nframes)
 }
