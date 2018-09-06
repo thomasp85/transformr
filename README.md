@@ -45,7 +45,7 @@ star$col <- 'steelblue'
 circles <- poly_circles()
 circles$col <- c('forestgreen', 'firebrick', 'goldenrod')[circles$id]
 
-animation <- tween_polygon(star, circles, 'cubic-in-out', 40, 'id') %>% 
+animation <- tween_polygon(star, circles, 'cubic-in-out', 40, id) %>% 
   keep_state(10)
 
 ani <- lapply(split(animation, animation$.frame), polyplot)
@@ -61,7 +61,7 @@ from_below <- function(data) {
   data$y <- data$y - 2
   data
 }
-animation <- tween_polygon(star, circles, 'cubic-in-out', 40, 'id', enter = from_below) %>% 
+animation <- tween_polygon(star, circles, 'cubic-in-out', 40, id, enter = from_below) %>% 
   keep_state(10)
 
 ani <- lapply(split(animation, animation$.frame), polyplot)
@@ -76,7 +76,7 @@ Similar to the `enter` function it is possible to supply an `exit` function when
 Our last option is to not match the polygons up, but simply say "make everything in the first state, into everything in the last state... somehow". This involves cutting up polygons in the state with fewest polygons and match polygons by minimizing the distance and area difference between pairs. All of this is controlled by setting `match = FALSE` in `tween_polygon()`, and `transformr` will then do its magic:
 
 ``` r
-animation <- tween_polygon(star, circles, 'cubic-in-out', 40, 'id', match = FALSE) %>% 
+animation <- tween_polygon(star, circles, 'cubic-in-out', 40, id, match = FALSE) %>% 
   keep_state(10)
 
 ani <- lapply(split(animation, animation$.frame), polyplot)
@@ -98,7 +98,7 @@ pathplot <- function(data) {
 spiral <- path_spiral()
 waves <- path_waves()
 
-animation <- tween_path(spiral, waves, 'cubic-in-out', 40, 'id', enter = from_below) %>% 
+animation <- tween_path(spiral, waves, 'cubic-in-out', 40, id, enter = from_below) %>% 
   keep_state(10)
 
 ani <- lapply(split(animation, animation$.frame), pathplot)
@@ -107,7 +107,7 @@ ani <- lapply(split(animation, animation$.frame), pathplot)
 ![](man/figures/README-unnamed-chunk-5.gif)
 
 ``` r
-animation <- tween_path(spiral, waves, 'cubic-in-out', 40, 'id', match = FALSE) %>% 
+animation <- tween_path(spiral, waves, 'cubic-in-out', 40, id, match = FALSE) %>% 
   keep_state(10)
 
 ani <- lapply(split(animation, animation$.frame), pathplot)
