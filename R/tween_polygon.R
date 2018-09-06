@@ -71,7 +71,6 @@ tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exi
   polygons <- align_polygons(from, to, enter = enter, exit = exit, match = match)
   polygons <- tween_state(polygons$from, polygons$to, ease = ease, nframes = nframes)
   polygons <- polygons[!polygons$.frame %in% c(1, nframes), , drop = FALSE]
-  polygons$.id <- if (quo_is_null(id)) rep(1L, nrow(polygons)) else eval_tidy(id, polygons)
   morph <- rbind(
     cbind(from, .frame = rep(1, nrow(from))),
     polygons,
@@ -97,8 +96,12 @@ align_polygons <- function(from, to, min_n = 50, enter, exit, match = TRUE) {
     ),
     SIMPLIFY = FALSE
   )
-  from <- do.call(rbind, lapply(polygons, `[[`, 'from'))
+  from <- lapply(polygons, `[[`, 'from')
+  id <- rep(seq_along(from), vapply(from, nrow, integer(1)))
+  from <- do.call(rbind, from)
   to <- do.call(rbind, lapply(polygons, `[[`, 'to'))
+  from$.id <- id
+  to$.id <- id
   common_id(from = from, to = to)
 }
 
@@ -253,7 +256,9 @@ split_polygon <- function(polygon, n) {
   lapply(tiles, function(t) {
     x <- t[[1]][-nrow(t[[1]]), 1]
     y <- t[[1]][-nrow(t[[1]]), 2]
-    tile <- all_points[match(paste0(x, '-' , y), id), , drop = FALSE]
+    orig_points <- match(paste0(x, '-' , y), id)
+    orig_points <- orig_points[fill_down(is.na(orig_points))]
+    tile <- all_points[orig_points, , drop = FALSE]
     tile$x <- x
     tile$y <- y
     list(tile)

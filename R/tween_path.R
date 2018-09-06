@@ -45,7 +45,6 @@ tween_path <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit =
   paths <- align_paths(from, to, enter = enter, exit = exit, match = match)
   paths <- tween_state(paths$from, paths$to, ease = ease, nframes = nframes)
   paths <- paths[!paths$.frame %in% c(1, nframes), , drop = FALSE]
-  paths$.id <- if (quo_is_null(id)) rep(1L, nrow(paths)) else eval_tidy(id, paths)
   morph <- rbind(
     cbind(from, .frame = rep(1, nrow(from))),
     paths,
@@ -71,8 +70,12 @@ align_paths <- function(from, to, min_n = 50, enter, exit, match) {
     ),
     SIMPLIFY = FALSE
   )
-  from <- do.call(rbind, lapply(paths, `[[`, 'from'))
+  from <- lapply(paths, `[[`, 'from')
+  id <- rep(seq_along(from), vapply(from, nrow, integer(1)))
+  from <- do.call(rbind, from)
   to <- do.call(rbind, lapply(paths, `[[`, 'to'))
+  from$.id <- id
+  to$.id <- id
   common_id(from = from, to = to)
 }
 prep_match_paths <- function(from, to) {

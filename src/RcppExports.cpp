@@ -45,6 +45,17 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// fill_down
+IntegerVector fill_down(LogicalVector nas);
+RcppExport SEXP _transformr_fill_down(SEXP nasSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< LogicalVector >::type nas(nasSEXP);
+    rcpp_result_gen = Rcpp::wrap(fill_down(nas));
+    return rcpp_result_gen;
+END_RCPP
+}
 // unpack_sf
 List unpack_sf(List sf, CharacterVector type);
 RcppExport SEXP _transformr_unpack_sf(SEXP sfSEXP, SEXP typeSEXP) {
@@ -87,6 +98,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_transformr_find_splits", (DL_FUNC) &_transformr_find_splits, 2},
     {"_transformr_insert_points", (DL_FUNC) &_transformr_insert_points, 4},
     {"_transformr_rotate", (DL_FUNC) &_transformr_rotate, 4},
+    {"_transformr_fill_down", (DL_FUNC) &_transformr_fill_down, 1},
     {"_transformr_unpack_sf", (DL_FUNC) &_transformr_unpack_sf, 2},
     {"_transformr_repack_sf", (DL_FUNC) &_transformr_repack_sf, 3},
     {"_transformr_cut_polygon", (DL_FUNC) &_transformr_cut_polygon, 2},

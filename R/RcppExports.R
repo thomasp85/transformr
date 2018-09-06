@@ -13,6 +13,10 @@ rotate <- function(poly_x, poly_y, ref_x, ref_y) {
     .Call('_transformr_rotate', PACKAGE = 'transformr', poly_x, poly_y, ref_x, ref_y)
 }
 
+fill_down <- function(nas) {
+    .Call('_transformr_fill_down', PACKAGE = 'transformr', nas)
+}
+
 unpack_sf <- function(sf, type) {
     .Call('_transformr_unpack_sf', PACKAGE = 'transformr', sf, type)
 }
