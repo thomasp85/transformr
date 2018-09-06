@@ -127,14 +127,17 @@ align_sf_path <- function(from, to, min_n) {
     match_shapes,
     from = prepped$from,
     to = prepped$to,
-    new_id = seq_along(prepped$from),
     MoreArgs = list(
-      id = 'id', enter = NULL, exit = NULL, min_n = min_n, closed = FALSE
+      enter = NULL, exit = NULL, min_n = min_n, closed = FALSE
     ),
     SIMPLIFY = FALSE
   )
-  from <- do.call(rbind, lapply(polygons, `[[`, 'from'))
+  from <- lapply(polygons, `[[`, 'from')
+  id <- rep(seq_along(from), vapply(from, nrow, integer(1)))
+  from <- do.call(rbind, from)
   to <- do.call(rbind, lapply(polygons, `[[`, 'to'))
+  from$id <- id
+  to$id <- id
   list(from = from, to = to)
 }
 align_sf_polygon <- function(from ,to, min_n) {
@@ -145,14 +148,17 @@ align_sf_polygon <- function(from ,to, min_n) {
     match_shapes,
     from = prepped$from,
     to = prepped$to,
-    new_id = seq_along(prepped$from),
     MoreArgs = list(
-      id = 'id', enter = NULL, exit = NULL, min_n = min_n, closed = TRUE
+      enter = NULL, exit = NULL, min_n = min_n, closed = TRUE
     ),
     SIMPLIFY = FALSE
   )
-  from <- do.call(rbind, lapply(polygons, `[[`, 'from'))
+  from <- lapply(polygons, `[[`, 'from')
+  id <- rep(seq_along(from), vapply(from, nrow, integer(1)))
+  from <- do.call(rbind, from)
   to <- do.call(rbind, lapply(polygons, `[[`, 'to'))
+  from$id <- id
+  to$id <- id
   list(from = from, to = to)
 }
 supp_types <- c('POINT', 'LINESTRING', 'POLYGON', 'MULTIPOINT', 'MULTILINESTRING', 'MULTIPOLYGON')
