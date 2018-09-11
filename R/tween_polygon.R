@@ -47,7 +47,7 @@
 #' the number.
 #'
 #' @export
-#' @importFrom tweenr tween_state .get_last_frame .with_prior_frames
+#' @importFrom tweenr tween_state .get_last_frame .with_prior_frames .has_frames
 #' @importFrom rlang enquo quo_is_null quo eval_tidy %||%
 #'
 #' @examples
@@ -67,7 +67,7 @@ tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exi
   from$.phase <- rep('raw', nrow(from))
   to$.id <- eval_tidy(id, to) %||% rep(1L, nrow(to))
   to$.phase <- rep('raw', nrow(to))
-  if (nrow(from) != nrow(.data)) nframes <- nframes + 1
+  if (.has_frames(.data)) nframes <- nframes + 1
   polygons <- align_polygons(from, to, enter = enter, exit = exit, match = match)
   polygons <- tween_state(polygons$from, polygons$to, ease = ease, nframes = nframes)
   polygons <- polygons[!polygons$.frame %in% c(1, nframes), , drop = FALSE]

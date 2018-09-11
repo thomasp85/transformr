@@ -32,6 +32,7 @@
 #' has the same id in the other state.
 #'
 #' @importFrom rlang enquo quo_is_null eval_tidy %||%
+#' @importFrom tweenr .has_frames tween_state
 #' @export
 tween_path <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
   stopifnot(is.data.frame(.data))
@@ -41,7 +42,7 @@ tween_path <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit =
   from$.phase <- rep('raw', nrow(from))
   to$.id <- eval_tidy(id, to) %||% rep(1L, nrow(to))
   to$.phase <- rep('raw', nrow(to))
-  if (nrow(from) != nrow(.data)) nframes <- nframes + 1
+  if (.has_frames(.data)) nframes <- nframes + 1
   paths <- align_paths(from, to, enter = enter, exit = exit, match = match)
   paths <- tween_state(paths$from, paths$to, ease = ease, nframes = nframes)
   paths <- paths[!paths$.frame %in% c(1, nframes), , drop = FALSE]
