@@ -56,7 +56,7 @@ tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = N
   morph[which(sf_columns)] <- tween_sf_col(sf_from, sf_to, rep(ease, length.out = ncol(from))[sf_columns], nframes)
   morph <- morph[!morph$.frame %in% c(1, nframes), , drop = FALSE]
   morph <- rbind(
-    cbind(as.data.frame(from), .frame = rep(1, nrow(from))),
+    if (nframes > 1) cbind(as.data.frame(from), .frame = rep(1, nrow(from))) else NULL,
     morph,
     cbind(as.data.frame(to), .frame = rep(nframes, nrow(to)))
   )

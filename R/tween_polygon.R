@@ -72,7 +72,7 @@ tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exi
   polygons <- tween_state(polygons$from, polygons$to, ease = ease, nframes = nframes)
   polygons <- polygons[!polygons$.frame %in% c(1, nframes), , drop = FALSE]
   morph <- rbind(
-    cbind(from, .frame = rep(1, nrow(from))),
+    if (nframes > 1) cbind(from, .frame = rep(1, nrow(from))) else NULL,
     polygons,
     cbind(to, .frame = rep(nframes, nrow(to)))
   )
