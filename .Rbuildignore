@@ -4,3 +4,5 @@
 ^appveyor\.yml$
 ^README\.Rmd$
 ^README-.*\.png$
+^README_cache/
+^man/figures/.*\.jpeg

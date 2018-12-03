@@ -42,6 +42,7 @@ poly_circle <- function(st = FALSE, detail = 360) {
   }
 }
 #' @rdname simple_shapes
+#' @importFrom sf st_multipolygon
 #' @export
 poly_circles <- function(st = FALSE, n = 3, r = 0.25, detail = 360) {
   i <- seq(0, 2*pi, length.out = n+1)[-n-1]

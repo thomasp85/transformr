@@ -6,6 +6,8 @@
 \alias{transformr-package}
 \title{transformr: Polygon Transformations}
 \description{
+\if{html}{\figure{logo.png}{options: align='right'}}
+
 In order to smoothly animate the transformation of polygons and 
     paths, many aspects needs to be taken into account, such as differing number 
     of control points, changing center of rotation, etc. The 'transformr' 

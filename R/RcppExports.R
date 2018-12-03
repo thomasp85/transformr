@@ -25,7 +25,3 @@ repack_sf <- function(df, type, n_frames) {
     .Call('_transformr_repack_sf', PACKAGE = 'transformr', df, type, n_frames)
 }
 
-cut_polygon <- function(polygon, n) {
-    .Call('_transformr_cut_polygon', PACKAGE = 'transformr', polygon, n)
-}
-

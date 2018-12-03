@@ -209,24 +209,6 @@ as_clockwise <- function(polygon) {
     })
   })
 }
-#' @importFrom sf st_union st_multipolygon
-# split_polygon <- function(polygon, n) {
-#   if (n == 1) return(list(polygon))
-#   n_points <- sum(vapply(polygon, nrow, integer(1)))
-#   if (n_points < n + 2) polygon[[1]] <- add_points(polygon[[1]], n + 2 - n_points)
-#   triangles <- as.data.frame(cut_polygon(polygon, n))
-#   names(triangles) <- c('x', 'y', 'groups')
-#   all_points <- do.call(rbind, polygon)
-#   id <- paste0(all_points$x, '-', all_points$y)
-#   lapply(split(triangles[, c('x', 'y')], triangles$groups), function(poly) {
-#     tri <- split(poly, rep(seq_len(nrow(poly)/3), each = 3))
-#     tri <- lapply(tri, function(x) list(as.matrix(x[c(1:3,1),])))
-#     poly <- as.list(st_union(st_multipolygon(tri)))
-#     lapply(poly, function(p) {
-#       all_points[match(paste0(p[-nrow(p),1], '-' , p[-nrow(p),2]), id), , drop = FALSE]
-#     })
-#   })
-# }
 #' @importFrom sf st_polygon st_sample st_combine st_intersection st_cast st_voronoi st_as_sfc st_bbox st_sfc st_area st_touches st_union
 split_polygon <- function(polygon, n) {
   poly <- st_polygon(lapply(polygon, function(p) cbind(p$x, p$y)[c(seq_len(nrow(p)), 1), ]))
@@ -295,7 +277,7 @@ to_polygon <- function(points) {
 #'
 #' @return An object of the same type as `st`
 #'
-#' @importFrom sf st_bbox st_geometry
+#' @importFrom sf st_bbox st_geometry st_geometry<-
 #' @export
 #'
 #' @examples
