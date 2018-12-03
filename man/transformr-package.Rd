@@ -4,7 +4,7 @@
 \name{transformr-package}
 \alias{transformr}
 \alias{transformr-package}
-\title{transformr: Polygon Transformations}
+\title{transformr: Polygon and Path Transformations}
 \description{
 \if{html}{\figure{logo.png}{options: align='right'}}
 
@@ -25,10 +25,5 @@ Useful links:
 }
 \author{
 \strong{Maintainer}: Thomas Lin Pedersen \email{thomasp85@gmail.com}
-
-Authors:
-\itemize{
-  \item Mapbox (Developer of earcut.hpp)
-}
 
 }
