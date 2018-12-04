@@ -239,8 +239,12 @@ split_polygon <- function(polygon, n) {
     x <- t[[1]][-nrow(t[[1]]), 1]
     y <- t[[1]][-nrow(t[[1]]), 2]
     orig_points <- match(paste0(x, '-' , y), id)
-    orig_points <- orig_points[fill_down(is.na(orig_points))]
-    tile <- all_points[orig_points, , drop = FALSE]
+    if (all(is.na(orig_points))) {
+      tile <- all_points[rep(1, length(orig_points)), , drop = FALSE]
+    } else {
+      orig_points <- orig_points[fill_down(is.na(orig_points))]
+      tile <- all_points[orig_points, , drop = FALSE]
+    }
     tile$x <- x
     tile$y <- y
     list(tile)
