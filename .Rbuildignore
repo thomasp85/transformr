@@ -6,3 +6,6 @@
 ^README-.*\.png$
 ^README_cache/
 ^man/figures/.*\.jpeg
+^cran-comments\.md$
+^CRAN-RELEASE$
+^revdep

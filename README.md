@@ -7,8 +7,8 @@
 Status](https://travis-ci.org/thomasp85/transformr.svg?branch=master)](https://travis-ci.org/thomasp85/transformr)
 [![AppVeyor Build
 Status](https://ci.appveyor.com/api/projects/status/github/thomasp85/transformr?branch=master&svg=true)](https://ci.appveyor.com/project/thomasp85/transformr)
-[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version-ago/transformr)](http://cran.r-project.org/package=transformr)
-[![CRAN\_Download\_Badge](http://cranlogs.r-pkg.org/badges/grand-total/transformr)](http://cran.r-project.org/package=transformr)
+[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version-ago/transformr)](https://cran.r-project.org/package=transformr)
+[![CRAN\_Download\_Badge](https://cranlogs.r-pkg.org/badges/grand-total/transformr)](https://cran.r-project.org/package=transformr)
 [![Coverage
 Status](https://img.shields.io/codecov/c/github/thomasp85/transformr/master.svg)](https://codecov.io/github/thomasp85/transformr?branch=master)
 
@@ -113,8 +113,7 @@ everything in the first state, into everything in the last state…
 somehow”. This involves cutting up polygons in the state with fewest
 polygons and match polygons by minimizing the distance and area
 difference between pairs. All of this is controlled by setting `match =
-FALSE` in `tween_polygon()`, and `transformr` will then do its
-magic:
+FALSE` in `tween_polygon()`, and `transformr` will then do its magic:
 
 ``` r
 animation <- tween_polygon(star, circles, 'cubic-in-out', 40, id, match = FALSE) %>% 

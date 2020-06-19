@@ -1,13 +1,13 @@
 Package: transformr
 Type: Package
 Title: Polygon and Path Transformations
-Version: 0.1.1
-Date: 2018-12-04
+Version: 0.1.2
 Authors@R: 
     person(given = "Thomas Lin",
            family = "Pedersen",
            role = c("cre", "aut"),
-           email = "thomasp85@gmail.com")
+           email = "thomasp85@gmail.com",
+           comment = c(ORCID = "0000-0002-5147-4711"))
 Maintainer: Thomas Lin Pedersen <thomasp85@gmail.com>
 Description: In order to smoothly animate the transformation of polygons and 
     paths, many aspects needs to be taken into account, such as differing number 
