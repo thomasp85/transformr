@@ -152,7 +152,14 @@ make_polygons <- function(x) {
       xx <- xx[-holes, , drop = FALSE]
       xx <- split(xx, rep(seq_along(holes), diff(c(0, holes)) - 1))
     }
-    xx
+    lapply(xx, function(ring) {
+      nr <- nrow(ring)
+      if (nr > 0 && nr < 4) {
+        ring[c(seq_len(nr), rep(1, 4 - nr)), ]
+      } else {
+        ring
+      }
+    })
   })
 }
 align_holes <- function(from, to) {

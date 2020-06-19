@@ -4,8 +4,16 @@
 \alias{tween_polygon}
 \title{Transition between polygon data.frames}
 \usage{
-tween_polygon(.data, to, ease, nframes, id = NULL, enter = NULL,
-  exit = NULL, match = TRUE)
+tween_polygon(
+  .data,
+  to,
+  ease,
+  nframes,
+  id = NULL,
+  enter = NULL,
+  exit = NULL,
+  match = TRUE
+)
 }
 \arguments{
 \item{.data}{A data.frame to start from. If \code{.data} is the result of a prior

@@ -1,4 +1,7 @@
 add_points <- function(polygon, n, connect = TRUE) {
+  if (nrow(polygon) == 1) {
+    return(polygon[rep(1, n + 1), , drop = FALSE])
+  }
   if (connect) {
     x <- diff(c(polygon$x, polygon$x[1]))
     y <- diff(c(polygon$y, polygon$y[1]))

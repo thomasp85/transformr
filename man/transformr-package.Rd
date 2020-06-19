@@ -6,7 +6,7 @@
 \alias{transformr-package}
 \title{transformr: Polygon and Path Transformations}
 \description{
-\if{html}{\figure{logo.png}{options: align='right'}}
+\if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
 
 In order to smoothly animate the transformation of polygons and 
     paths, many aspects needs to be taken into account, such as differing number 

@@ -4,8 +4,7 @@
 \alias{tween_sf}
 \title{Transition between data.frames containing sfc columns}
 \usage{
-tween_sf(.data, to, ease, nframes, id = NULL, enter = NULL,
-  exit = NULL)
+tween_sf(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL)
 }
 \arguments{
 \item{.data}{A data.frame to start from. If \code{.data} is the result of a prior

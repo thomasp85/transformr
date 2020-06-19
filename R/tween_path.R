@@ -118,14 +118,29 @@ to_path <- function(path) {
     path <- path[-gaps, , drop = FALSE]
     path <- split(path, rep(seq_along(gaps), diff(c(0, gaps)) - 1))
   }
+  lapply(path, function(line) {
+    if (nrow(line) == 1) {
+      line[c(1,1), ]
+    } else {
+      line
+    }
+  })
 }
 #' @importFrom sf st_multilinestring st_linestring
 to_line <- function(path) {
   if (is.data.frame(path)) {
-    st_linestring(cbind(path$x, path$y))
+    if (nrow(path) == 1) {
+      st_linestring(cbind(path$x[c(1, 1)], path$y[c(1, 1)]))
+    } else {
+      st_linestring(cbind(path$x, path$y))
+    }
   } else {
     st_multilinestring(lapply(path, function(x) {
-      cbind(x$x, x$y)
+      if (nrow(x) == 1) {
+        cbind(x$x[c(1, 1)], x$y[c(1, 1)])
+      } else {
+        cbind(x$x, x$y)
+      }
     }))
   }
 }
