@@ -1,4 +1,7 @@
 add_points <- function(polygon, n, connect = TRUE) {
+  if (n < 1) {
+    return(polygon)
+  }
   if (nrow(polygon) == 1) {
     return(polygon[rep(1, n + 1), , drop = FALSE])
   }
