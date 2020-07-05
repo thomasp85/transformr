@@ -1,7 +1,7 @@
 Package: transformr
 Type: Package
 Title: Polygon and Path Transformations
-Version: 0.1.2.9000
+Version: 0.1.3
 Authors@R: 
     person(given = "Thomas Lin",
            family = "Pedersen",
