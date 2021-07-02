@@ -3,14 +3,14 @@
 
 # transformr <img src="man/figures/logo.png" align="right"/>
 
-[![Travis-CI Build
-Status](https://travis-ci.org/thomasp85/transformr.svg?branch=master)](https://travis-ci.org/thomasp85/transformr)
-[![AppVeyor Build
-Status](https://ci.appveyor.com/api/projects/status/github/thomasp85/transformr?branch=master&svg=true)](https://ci.appveyor.com/project/thomasp85/transformr)
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/thomasp85/transformr/workflows/R-CMD-check/badge.svg)](https://github.com/thomasp85/transformr/actions)
 [![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version-ago/transformr)](https://cran.r-project.org/package=transformr)
 [![CRAN\_Download\_Badge](https://cranlogs.r-pkg.org/badges/grand-total/transformr)](https://cran.r-project.org/package=transformr)
-[![Coverage
-Status](https://img.shields.io/codecov/c/github/thomasp85/transformr/master.svg)](https://codecov.io/github/thomasp85/transformr?branch=master)
+[![Codecov test
+coverage](https://codecov.io/gh/thomasp85/transformr/branch/master/graph/badge.svg)](https://codecov.io/gh/thomasp85/transformr?branch=master)
+<!-- badges: end -->
 
 If you’ve ever made animated data visualisations you’ll know that
 arbitrary polygons and lines requires special considerations if the
