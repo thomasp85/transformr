@@ -24,7 +24,9 @@ Imports: Rcpp (>= 0.12.15),
     rlang,
     sf,
     lpSolve
-Suggests: magrittr
+Suggests: 
+    covr,
+    magrittr
 LinkingTo: Rcpp
 RoxygenNote: 7.1.0.9000
 Roxygen: list(markdown = TRUE)
