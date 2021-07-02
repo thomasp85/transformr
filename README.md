@@ -30,7 +30,9 @@ encoded as simple x/y data.frames or as simpel features using the
 
 ## Installation
 
-You can install transformr from github with:
+You can install transformr from CRAN using
+`install.packages('transformr')` or grab the development version from
+github with:
 
 ``` r
 # install.packages("devtools")
@@ -112,8 +114,9 @@ Our last option is to not match the polygons up, but simply say “make
 everything in the first state, into everything in the last state…
 somehow”. This involves cutting up polygons in the state with fewest
 polygons and match polygons by minimizing the distance and area
-difference between pairs. All of this is controlled by setting `match =
-FALSE` in `tween_polygon()`, and `transformr` will then do its magic:
+difference between pairs. All of this is controlled by setting
+`match = FALSE` in `tween_polygon()`, and `transformr` will then do its
+magic:
 
 ``` r
 animation <- tween_polygon(star, circles, 'cubic-in-out', 40, id, match = FALSE) %>% 
@@ -208,9 +211,3 @@ ani <- lapply(split(animation, animation$.frame), sfplot)
 ```
 
 ![](man/figures/README-unnamed-chunk-7.gif)
-
-## Future
-
-The main goal right now is to get `transformr` ready for a release on
-CRAN. Further development will be guided by the needs of the community,
-so open an issue if you have any unmet needs or cool ideas\!

@@ -40,7 +40,8 @@ simple x/y data.frames or as simpel features using the
 
 ## Installation
 
-You can install transformr from github with:
+You can install transformr from CRAN using `install.packages('transformr')` or
+grab the development version from github with:
 
 ```{r gh-installation, eval = FALSE}
 # install.packages("devtools")
@@ -198,8 +199,3 @@ animation <- tween_sf(df1, df2, 'cubic-in-out', 40) %>%
 
 ani <- lapply(split(animation, animation$.frame), sfplot)
 ```
-
-## Future
-The main goal right now is to get `transformr` ready for a release on CRAN. 
-Further development will be guided by the needs of the community, so open an
-issue if you have any unmet needs or cool ideas!
