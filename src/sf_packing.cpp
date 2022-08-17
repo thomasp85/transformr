@@ -1,160 +1,192 @@
-#include <Rcpp.h>
-using namespace Rcpp;
+#include <cpp11/strings.hpp>
+#include <cpp11/list.hpp>
+#include <cpp11/doubles.hpp>
+#include <cpp11/integers.hpp>
+#include <cpp11/data_frame.hpp>
+#include <cpp11/matrix.hpp>
 
-CharacterVector MULTIPOINTCLASS = CharacterVector::create("XY", "MULTIPOINT", "sfg");
-CharacterVector MULTILINESTRINGCLASS = CharacterVector::create("XY", "MULTILINESTRING", "sfg");
-CharacterVector MULTIPOLYGONCLASS = CharacterVector::create("XY", "MULTIPOLYGON", "sfg");
+#include <vector>
 
-Shelter<SEXP> shelter;
+using namespace cpp11::literals;
 
-//[[Rcpp::export]]
-List unpack_sf(List sf, CharacterVector type) {
-  List res(sf.size());
+cpp11::writable::strings MULTIPOINTCLASS = {"XY", "MULTIPOINT", "sfg"};
+cpp11::writable::strings MULTILINESTRINGCLASS = {"XY", "MULTILINESTRING", "sfg"};
+cpp11::writable::strings MULTIPOLYGONCLASS = {"XY", "MULTIPOLYGON", "sfg"};
+
+[[cpp11::register]]
+cpp11::writable::list unpack_sf(cpp11::list sf, cpp11::strings type) {
+  cpp11::writable::list res(sf.size());
   int i;
   for (i = 0; i < sf.size(); ++i) {
     if (type[i] == "POINT") {
-      NumericVector coord = sf[i];
-      DataFrame new_coord = DataFrame::create(
-        _["x"] = coord[0],
-        _["y"] = coord[1]
-      );
+      cpp11::doubles coord = sf[i];
+      cpp11::writable::data_frame new_coord({
+        "x"_nm = coord[0],
+        "y"_nm = coord[1]
+      });
       res[i] = new_coord;
     } else if (type[i] == "MULTIPOINT") {
-      NumericMatrix coord = sf[i];
-      DataFrame new_coord = DataFrame::create(
-        _["x"] = coord(_, 0),
-        _["y"] = coord(_, 1)
-      );
+      cpp11::doubles_matrix<> coord = sf[i];
+      cpp11::doubles coord_vec = coord.data();
+      cpp11::writable::doubles x(coord_vec.begin(), coord_vec.begin() + coord.nrow());
+      cpp11::writable::doubles y(coord_vec.begin() + coord.nrow(), coord_vec.end());
+      cpp11::writable::data_frame new_coord({
+        "x"_nm = x,
+        "y"_nm = y
+      });
       res[i] = new_coord;
     } else if (type[i] == "LINESTRING") {
-      NumericMatrix coord = sf[i];
-      DataFrame new_coord = DataFrame::create(
-        _["x"] = coord(_, 0),
-        _["y"] = coord(_, 1)
-      );
-      res[i] = List::create(List::create(new_coord));
+      cpp11::doubles_matrix<> coord = sf[i];
+      cpp11::doubles coord_vec = coord.data();
+      cpp11::writable::doubles x(coord_vec.begin(), coord_vec.begin() + coord.nrow());
+      cpp11::writable::doubles y(coord_vec.begin() + coord.nrow(), coord_vec.end());
+      cpp11::writable::data_frame new_coord({
+        "x"_nm = x,
+        "y"_nm = y
+      });
+      cpp11::writable::list wrapper, wrapper2;
+      wrapper.push_back(new_coord);
+      wrapper2.push_back(wrapper);
+      res[i] = wrapper2;
     } else if (type[i] == "MULTILINESTRING") {
-      List coord_list = sf[i];
-      List new_coord_list(coord_list.size());
+      cpp11::list coord_list = sf[i];
+      cpp11::writable::list new_coord_list(coord_list.size());
       for (int j = 0; j < coord_list.size(); ++j) {
-        NumericMatrix coord = coord_list[j];
-        DataFrame new_coord = DataFrame::create(
-          _["x"] = coord(_, 0),
-          _["y"] = coord(_, 1)
-        );
-        new_coord_list[j] = List::create(new_coord);
+        cpp11::doubles_matrix<> coord = coord_list[j];
+        cpp11::doubles coord_vec = coord.data();
+        cpp11::writable::doubles x(coord_vec.begin(), coord_vec.begin() + coord.nrow());
+        cpp11::writable::doubles y(coord_vec.begin() + coord.nrow(), coord_vec.end());
+        cpp11::writable::data_frame new_coord({
+          "x"_nm = x,
+          "y"_nm = y
+        });
+        cpp11::writable::list wrapper;
+        wrapper.push_back(new_coord);
+        new_coord_list[j] = wrapper;
       }
       res[i] = new_coord_list;
     } else if (type[i] == "POLYGON") {
-      List coord_list = sf[i];
-      List new_coord_list(coord_list.size());
+      cpp11::list coord_list = sf[i];
+      cpp11::writable::list new_coord_list(coord_list.size());
       for (int j = 0; j < coord_list.size(); ++j) {
-        NumericMatrix coord = coord_list[j];
-        coord = coord(Range(0, coord.nrow() - 2), _);
-        DataFrame new_coord = DataFrame::create(
-          _["x"] = coord(_, 0),
-          _["y"] = coord(_, 1)
-        );
+        cpp11::doubles_matrix<> coord = coord_list[j];
+        cpp11::doubles coord_vec = coord.data();
+        cpp11::writable::doubles x(coord_vec.begin(), coord_vec.begin() + (coord.nrow() - 1));
+        cpp11::writable::doubles y(coord_vec.begin() + coord.nrow(), coord_vec.end() + -1);
+        cpp11::writable::data_frame new_coord({
+          "x"_nm = x,
+          "y"_nm = y
+        });
         new_coord_list[j] = new_coord;
       }
-      res[i] = List::create(new_coord_list);
+      cpp11::writable::list wrapper;
+      wrapper.push_back(new_coord_list);
+      res[i] = wrapper;
     } else if (type[i] == "MULTIPOLYGON") {
-      List coord_list = sf[i];
-      List new_coord_list(coord_list.size());
+      cpp11::list coord_list = sf[i];
+      cpp11::writable::list new_coord_list(coord_list.size());
       for (int j = 0; j < coord_list.size(); ++j) {
-        List polygon = coord_list[j];
-        List new_polygon(polygon.size());
+        cpp11::list polygon = coord_list[j];
+        cpp11::writable::list new_polygon(polygon.size());
         for (int k = 0; k < polygon.size(); ++k) {
-          NumericMatrix coord = polygon[k];
-          coord = coord(Range(0, coord.nrow() - 2), _);
-          DataFrame new_coord = DataFrame::create(
-            _["x"] = coord(_, 0),
-            _["y"] = coord(_, 1)
-          );
+          cpp11::doubles_matrix<> coord = polygon[k];
+          cpp11::doubles coord_vec = coord.data();
+          cpp11::writable::doubles x(coord_vec.begin(), coord_vec.begin() + (coord.nrow() - 1));
+          cpp11::writable::doubles y(coord_vec.begin() + coord.nrow(), coord_vec.end() + -1);
+          cpp11::writable::data_frame new_coord({
+            "x"_nm = x,
+            "y"_nm = y
+          });
           new_polygon[k] = new_coord;
         }
         new_coord_list[j] = new_polygon;
       }
       res[i] = new_coord_list;
     } else {
-      stop("Unknown geometry type");
+      cpp11::stop("Unknown geometry type");
     }
   }
   return res;
 }
-NumericMatrix make_point(NumericVector &x, NumericVector &y, std::vector< std::vector<int> > &start) {
+cpp11::doubles make_point(cpp11::doubles &x, cpp11::doubles &y, std::vector< std::vector<int> > &start) {
   int first = start[0][0];
   int last = start.back()[0];
   int size = last - first;
-  NumericMatrix res(size, 2);
+  cpp11::writable::doubles_matrix<> res(size, 2);
 
-  res(_, 0) = x[Range(first, last - 1)];
-  res(_, 1) = y[Range(first, last - 1)];
-  res.attr("class") = MULTIPOINTCLASS;
+  int row = 0;
+  for (int i = first; i < last; i++) {
+    res(row, 0) = x[i];
+    res(row, 1) = y[i];
+    row++;
+  }
+  cpp11::writable::doubles res2 = res.data();
+  res2.attr("class") = MULTIPOINTCLASS;
 
-  return res;
+  return res2;
 }
-List make_path(NumericVector &x, NumericVector &y, std::vector< std::vector<int> > &start) {
-  std::vector<NumericMatrix> res;
+cpp11::writable::list make_path(cpp11::doubles &x, cpp11::doubles &y, std::vector< std::vector<int> > &start) {
+  cpp11::writable::list res;
   int i, j;
   for (i = 0; i < start.size() - 1; ++i) {
     for (j = 0; j < start[i].size(); ++j) {
       int first = start[i][j];
       int last = j == start[i].size() - 1 ? start[i + 1][0] : start[i][j + 1] - 1;
-      NumericMatrix path(last - first, 2);
-      path(_, 0) = x[Range(first, last - 1)];
-      path(_, 1) = y[Range(first, last - 1)];
+      cpp11::writable::doubles_matrix<> path(last - first, 2);
+      int row = 0;
+      for (int k = first; k < last; k++) {
+        path(row, 0) = x[k];
+        path(row, 1) = y[k];
+        row++;
+      }
       res.push_back(path);
     }
   }
-  List res_final = wrap(res);
-  res_final.attr("class") = MULTILINESTRINGCLASS;
+  res.attr("class") = MULTILINESTRINGCLASS;
 
-  return res_final;
+  return res;
 }
-List make_polygon(NumericVector &x, NumericVector &y, std::vector< std::vector<int> > &start) {
-  std::vector<List> res;
-  std::vector<NumericMatrix> poly;
+cpp11::writable::list make_polygon(cpp11::doubles &x, cpp11::doubles &y, std::vector< std::vector<int> > &start) {
+  cpp11::writable::list res;
 
   int i, j, k;
   for (i = 0; i < start.size() - 1; ++i) {
+    cpp11::writable::list poly;
     for (j = 0; j < start[i].size(); ++j) {
       int first = start[i][j];
       int last = j == start[i].size() - 1 ? start[i + 1][0] : start[i][j + 1] - 1;
-      NumericMatrix polygon(last - first + 1, 2);
-      for (k = 0; k + first < last; ++k) {
-        polygon(k, 0) = x[k + first];
-        polygon(k, 1) = y[k + first];
+      cpp11::writable::doubles_matrix<> polygon(last - first + 1, 2);
+      int row = 0;
+      for (k = first; k < last; ++k) {
+        polygon(row, 0) = x[k];
+        polygon(row, 1) = y[k];
+        row++;
       }
-      polygon(k, 0) = polygon(0, 0);
-      polygon(k, 1) = polygon(0, 1);
+      polygon(row, 0) = x[first];
+      polygon(row, 1) = y[first];
       poly.push_back(polygon);
     }
-    List poly_list = wrap(poly);
-    res.push_back(poly_list);
-    poly.clear();
+    res.push_back(poly);
   }
+  res.attr("class") = MULTIPOLYGONCLASS;
 
-  List res_final = wrap(res);
-  res_final.attr("class") = MULTIPOLYGONCLASS;
-
-  return res_final;
+  return res;
 }
-//[[Rcpp::export]]
-List repack_sf(DataFrame df, CharacterVector type, int n_frames) {
-  List res(type.size() * n_frames);
-  IntegerVector id = df["sf_id"];
-  IntegerVector geo_id = df["id"];
-  IntegerVector frame = df[".frame"];
-  NumericVector x = df["x"];
-  NumericVector y = df["y"];
+[[cpp11::register]]
+cpp11::writable::list repack_sf(cpp11::data_frame df, cpp11::strings type, int n_frames) {
+  cpp11::writable::list res(type.size() * n_frames);
+  cpp11::integers id = df["sf_id"];
+  cpp11::integers geo_id = df["id"];
+  cpp11::integers frame = df[".frame"];
+  cpp11::doubles x = df["x"];
+  cpp11::doubles y = df["y"];
   int i;
   int k = 0;
   int current_id = id[0];
   int current_geo_id = geo_id[0];
   int current_frame = frame[0];
   bool last;
-  std::string current_type = as<std::string>(type[current_id - 1]);
+  std::string current_type = type[current_id - 1];
   std::vector< std::vector<int> > start_ind_all;
   std::vector<int> start_ind;
   start_ind.push_back(0);
@@ -183,7 +215,7 @@ List repack_sf(DataFrame df, CharacterVector type, int n_frames) {
       if (!last) {
         current_id = id[i];
         current_frame = frame[i];
-        current_type = as<std::string>(type[current_id - 1]);
+        current_type = type[current_id - 1];
         current_geo_id = geo_id[i];
         start_ind_all.clear();
         start_ind = {i};

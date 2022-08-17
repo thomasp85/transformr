@@ -1,11 +1,15 @@
-#include <Rcpp.h>
-using namespace Rcpp;
+#include <cpp11/integers.hpp>
+#include <cpp11/doubles.hpp>
+#include <cpp11/list.hpp>
 
-//[[Rcpp::export]]
-IntegerVector find_splits(NumericVector lengths, int n) {
+using namespace cpp11::literals;
+
+[[cpp11::register]]
+cpp11::integers find_splits_c(cpp11::doubles lengths, int n) {
   double total = 0;
   int i,j;
-  IntegerVector splits(lengths.size(), 0);
+  cpp11::writable::integers splits(lengths.size());
+  std::fill(splits.begin(), splits.end(), 0);
 
   for (i = 0; i < lengths.size() - 1; ++i) {
     total += lengths[i];
@@ -31,9 +35,9 @@ IntegerVector find_splits(NumericVector lengths, int n) {
   return splits;
 }
 
-//[[Rcpp::export]]
-List insert_points(NumericVector x, NumericVector y, IntegerVector splits, int n) {
-  std::vector<double> new_x, new_y;
+[[cpp11::register]]
+cpp11::writable::list insert_points_c(cpp11::doubles x, cpp11::doubles y, cpp11::integers splits, int n) {
+  cpp11::writable::doubles new_x, new_y;
   int i, j, next_i;
   double x_seg, y_seg;
 
@@ -50,15 +54,15 @@ List insert_points(NumericVector x, NumericVector y, IntegerVector splits, int n
     }
   }
 
-  return List::create(
-    Named("x") = new_x,
-    Named("y") = new_y
-  );
+  return cpp11::writable::list({
+    "x"_nm = new_x,
+    "y"_nm = new_y
+  });
 }
 
-//[[Rcpp::export]]
-int rotate(NumericVector poly_x, NumericVector poly_y, NumericVector ref_x,
-          NumericVector ref_y) {
+[[cpp11::register]]
+int rotate_c(cpp11::doubles poly_x, cpp11::doubles poly_y, cpp11::doubles ref_x,
+           cpp11::doubles ref_y) {
   double best_ss = std::numeric_limits<double>::infinity();
   int i, j, j_off, best_i = 0;
   int n = poly_x.size();

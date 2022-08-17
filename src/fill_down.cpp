@@ -1,12 +1,11 @@
-#include <Rcpp.h>
+#include <cpp11/integers.hpp>
+#include <cpp11/logicals.hpp>
 
-using namespace Rcpp;
-
-//[[Rcpp::export]]
-IntegerVector fill_down(LogicalVector nas) {
+[[cpp11::register]]
+cpp11::integers fill_down(cpp11::logicals nas) {
   int i;
   int last_na = 0;
-  IntegerVector indexes(nas.size());
+  cpp11::writable::integers indexes(nas.size());
 
   for (i = 0; i < nas.size(); ++i) {
     if (!nas[i]) {

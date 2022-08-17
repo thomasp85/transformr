@@ -19,16 +19,18 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 SystemRequirements: C++11
 LazyData: true
-Imports: Rcpp (>= 0.12.15),
+Imports: 
     tweenr,
     rlang,
     sf,
-    lpSolve
+    lpSolve,
+    vctrs
 Suggests: 
     covr,
     magrittr
-LinkingTo: Rcpp
-RoxygenNote: 7.1.0.9000
+LinkingTo: 
+    cpp11
+RoxygenNote: 7.1.1.9001
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/thomasp85/transformr
 BugReports: https://github.com/thomasp85/transformr/issues
