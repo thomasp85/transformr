@@ -66,35 +66,43 @@ tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = N
 #' @importFrom tweenr tween_state
 tween_sf_col <- function(from, to, ease, nframes) {
   lapply(seq_along(from), function(i) {
-    if (length(from[[i]]) == 0 && length(to[[i]]) == 0) return(st_sfc(list()))
-    from_type <- as.character(unlist(lapply(from[[i]], st_geometry_type)))
-    if (!all(from_type %in% supp_types)) stop('Unsupported geometry type', call. = FALSE)
-    to_type <- as.character(unlist(lapply(to[[i]], st_geometry_type)))
-    if (!all(to_type %in% supp_types)) stop('Unsupported geometry type', call. = FALSE)
-    if (!all(sub('MULTI', '', from_type) == sub('MULTI', '', to_type))) stop('Incompatible geometry types', call. = FALSE)
-    from <- unpack_sf(from[[i]], from_type)
-    to <- unpack_sf(to[[i]], to_type)
-    aligned <- Map(function(from, to, type) {
-      switch(
-        type,
-        POINT =,
-        MULTIPOINT = align_sf_point(from, to),
-        LINESTRING =,
-        MULTILINESTRING = align_sf_path(from, to, 50),
-        POLYGON =,
-        MULTIPOLYGON = align_sf_polygon(from, to, 50)
-      )
-    }, from = from, to = to, type = from_type)
-    from <- lapply(aligned, `[[`, 'from')
-    to <- lapply(aligned, `[[`, 'to')
-    id <- rep(seq_along(from), vapply(from, nrow, integer(1)))
-    from <- do.call(rbind, from)
-    to <- do.call(rbind, to)
-    from$sf_id <- id
-    to$sf_id <- id
-    tweened <- tween_state(from, to, ease, nframes)
-    st_sfc(repack_sf(tweened, from_type, nframes))
+    aligned <- align_sf(from[[i]], to[[i]])
+    tweened <- tween_state(aligned$from, aligned$to, ease, nframes)
+    tweened$id <- as.integer(tweened$id)
+    tweened$sf_id <- as.integer(tweened$sf_id)
+    tweened$.frame <- as.integer(tweened$.frame)
+    st_sfc(repack_sf(tweened, aligned$type, as.integer(nframes)))
   })
+}
+
+align_sf <- function(from, to) {
+  if (length(from) == 0 && length(to) == 0) return(st_sfc(list()))
+  from_type <- as.character(unlist(lapply(from, st_geometry_type)))
+  if (!all(from_type %in% supp_types)) stop('Unsupported geometry type', call. = FALSE)
+  to_type <- as.character(unlist(lapply(to, st_geometry_type)))
+  if (!all(to_type %in% supp_types)) stop('Unsupported geometry type', call. = FALSE)
+  if (!all(sub('MULTI', '', from_type) == sub('MULTI', '', to_type))) stop('Incompatible geometry types', call. = FALSE)
+  from <- unpack_sf(from, from_type)
+  to <- unpack_sf(to, to_type)
+  aligned <- Map(function(from, to, type) {
+    switch(
+      type,
+      POINT =,
+      MULTIPOINT = align_sf_point(from, to),
+      LINESTRING =,
+      MULTILINESTRING = align_sf_path(from, to, 50),
+      POLYGON =,
+      MULTIPOLYGON = align_sf_polygon(from, to, 50)
+    )
+  }, from = from, to = to, type = from_type)
+  from <- lapply(aligned, `[[`, 'from')
+  to <- lapply(aligned, `[[`, 'to')
+  id <- rep(seq_along(from), vapply(from, nrow, integer(1)))
+  from <- do.call(rbind, from)
+  to <- do.call(rbind, to)
+  from$sf_id <- id
+  to$sf_id <- id
+  list(from = from, to = to, type = from_type)
 }
 #' @importFrom sf st_point st_distance
 #' @importFrom lpSolve lp.assign
