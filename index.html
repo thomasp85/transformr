@@ -31,6 +31,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -43,18 +45,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">transformr</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.3.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.3.9000</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="reference/index.html">Reference</a>
 </li>
@@ -64,7 +60,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/thomasp85/transformr/">
+  <a href="https://github.com/thomasp85/transformr/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -81,132 +77,129 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="transformr-" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#transformr-" class="anchor"></a>transformr <img src="reference/figures/logo.png" align="right">
+<div class="section level1">
+<div class="page-header"><h1 id="transformr-">transformr <img src="reference/figures/logo.png" align="right"><a class="anchor" aria-label="anchor" href="#transformr-"></a>
 </h1></div>
-
-<p>If you’ve ever made animated data visualisations you’ll know that arbitrary polygons and lines requires special considerations if the animation is to be smooth and believable. <code>transformr</code> is able to remove all of these worries by expanding <a href="https://github.com/thomasp85/tweenr"><code>tweenr</code></a> to understand spatial data, and thus lets you focus on defining your animation steps. <code>transformr</code> takes care of matching shapes between states, cutting some in bits if the number doesn’t match between the states, and ensures that each pair of matched shapes contains the same number of anchor points and that these are paired up so as to avoid rotation and inversion during animation.</p>
-<p><code>transformr</code> supports both polygons (with holes), and paths either encoded as simple x/y data.frames or as simpel features using the <a href="https://github.com/r-spatial/sf"><code>sf</code></a> package.</p>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
-<p>You can install transformr from CRAN using <code><a href="https://rdrr.io/r/utils/install.packages.html">install.packages('transformr')</a></code> or grab the development version from github with:</p>
+<!-- badges: start -->
+<p>If you’ve ever made animated data visualisations you’ll know that arbitrary polygons and lines requires special considerations if the animation is to be smooth and believable. <code>transformr</code> is able to remove all of these worries by expanding <a href="https://github.com/thomasp85/tweenr" class="external-link"><code>tweenr</code></a> to understand spatial data, and thus lets you focus on defining your animation steps. <code>transformr</code> takes care of matching shapes between states, cutting some in bits if the number doesn’t match between the states, and ensures that each pair of matched shapes contains the same number of anchor points and that these are paired up so as to avoid rotation and inversion during animation.</p>
+<p><code>transformr</code> supports both polygons (with holes), and paths either encoded as simple x/y data.frames or as simpel features using the <a href="https://github.com/r-spatial/sf" class="external-link"><code>sf</code></a> package.</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>You can install transformr from CRAN using <code>install.packages('transformr')</code> or grab the development version from github with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># install.packages("devtools")</span>
-<span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"thomasp85/transformr"</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"thomasp85/transformr"</span><span class="op">)</span></span></code></pre></div>
 </div>
-<div id="examples" class="section level2">
-<h2 class="hasAnchor">
-<a href="#examples" class="anchor"></a>Examples</h2>
+<div class="section level2">
+<h2 id="examples">Examples<a class="anchor" aria-label="anchor" href="#examples"></a>
+</h2>
 <p>These are simple, contrieved examples showing how the API works. It scales simply to more complicated shapes.</p>
-<div id="polygon" class="section level3">
-<h3 class="hasAnchor">
-<a href="#polygon" class="anchor"></a>Polygon</h3>
+<div class="section level3">
+<h3 id="polygon">Polygon<a class="anchor" aria-label="anchor" href="#polygon"></a>
+</h3>
 <p>A polygon is simply a data.frame with an <code>x</code> and <code>y</code> column, where each row demarcates an anchor point for the polygon. The polygon is not in closed form, that is, the first point is not repeated in the end. If more polygons are wanted you can provide an additional column that indicate the polygon membership of a column (quite like <code>ggplot2::geom_polygon()</code> expects an <code>x</code>, <code>y</code>, and <code>group</code> variable). If holed polygons are needed, holes should follow the main polygon and be separated with an <code>NA</code> row in the <code>x</code> and <code>y</code> column.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thomasp85/transformr">transformr</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thomasp85/tweenr">tweenr</a></span><span class="op">)</span>
-<span class="kw"><a href="https://rdrr.io/r/base/library.html">library</a></span><span class="op">(</span><span class="va">ggplot2</span><span class="op">)</span>
-<span class="va">polyplot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span> 
-    <span class="fu">geom_polygon</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, group <span class="op">=</span> <span class="va">id</span>, fill <span class="op">=</span> <span class="va">col</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-    <span class="fu">scale_fill_identity</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span>
-    <span class="fu">coord_fixed</span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span><span class="op">)</span><span class="op">)</span>
-  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span>
-<span class="op">}</span>
-
-<span class="va">star</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">poly_star</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">star</span><span class="op">$</span><span class="va">col</span> <span class="op">&lt;-</span> <span class="st">'steelblue'</span>
-<span class="va">circles</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">poly_circles</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">circles</span><span class="op">$</span><span class="va">col</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'forestgreen'</span>, <span class="st">'firebrick'</span>, <span class="st">'goldenrod'</span><span class="op">)</span><span class="op">[</span><span class="va">circles</span><span class="op">$</span><span class="va">id</span><span class="op">]</span>
-
-<span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_polygon.html">tween_polygon</a></span><span class="op">(</span><span class="va">star</span>, <span class="va">circles</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span>, <span class="va">id</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>
-
-<span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">polyplot</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thomasp85/transformr" class="external-link">transformr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/thomasp85/tweenr" class="external-link">tweenr</a></span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="va">polyplot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_polygon</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, group <span class="op">=</span> <span class="va">id</span>, fill <span class="op">=</span> <span class="va">col</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">scale_fill_identity</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">coord_fixed</span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">star</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">poly_star</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">star</span><span class="op">$</span><span class="va">col</span> <span class="op">&lt;-</span> <span class="st">'steelblue'</span></span>
+<span><span class="va">circles</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">poly_circles</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">circles</span><span class="op">$</span><span class="va">col</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'forestgreen'</span>, <span class="st">'firebrick'</span>, <span class="st">'goldenrod'</span><span class="op">)</span><span class="op">[</span><span class="va">circles</span><span class="op">$</span><span class="va">id</span><span class="op">]</span></span>
+<span></span>
+<span><span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_polygon.html">tween_polygon</a></span><span class="op">(</span><span class="va">star</span>, <span class="va">circles</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span>, <span class="va">id</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html" class="external-link">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">polyplot</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-2.gif"></p>
 <p>By default the polygons are matched up based on their id. In the above example there’s a lack of polygons in the start-state, so these have to appear somehow. This is governed by the <code>enter</code> function, which by default is <code>NULL</code> meaning new polygons just appear at the end of the animation. We can change this to get a nicer result:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="co"># Make new polygons appear 2 units below their end position</span>
-<span class="va">from_below</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">data</span><span class="op">$</span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">data</span><span class="op">$</span><span class="va">y</span> <span class="op">-</span> <span class="fl">2</span>
-  <span class="va">data</span>
-<span class="op">}</span>
-<span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_polygon.html">tween_polygon</a></span><span class="op">(</span><span class="va">star</span>, <span class="va">circles</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span>, <span class="va">id</span>, enter <span class="op">=</span> <span class="va">from_below</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>
-
-<span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">polyplot</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="co"># Make new polygons appear 2 units below their end position</span></span>
+<span><span class="va">from_below</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">data</span><span class="op">$</span><span class="va">y</span> <span class="op">&lt;-</span> <span class="va">data</span><span class="op">$</span><span class="va">y</span> <span class="op">-</span> <span class="fl">2</span></span>
+<span>  <span class="va">data</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_polygon.html">tween_polygon</a></span><span class="op">(</span><span class="va">star</span>, <span class="va">circles</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span>, <span class="va">id</span>, enter <span class="op">=</span> <span class="va">from_below</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html" class="external-link">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">polyplot</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-3.gif"></p>
 <p>Similar to the <code>enter</code> function it is possible to supply an <code>exit</code> function when the start state has more polygons than the end state. These functions get a single polygon with the state it was/will be, that can then be manipulated at will, as long as the same number of rows and columns are returned.</p>
-<blockquote>
-<p>The <code>enter</code> and <code>exit</code> functions have slightly different semantics here than in <code><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html">tweenr::tween_state()</a></code> where it gets all entering/exiting rows in one go, and not one-by-one</p>
-</blockquote>
+<blockquote><p>The <code>enter</code> and <code>exit</code> functions have slightly different semantics here than in <code><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html" class="external-link">tweenr::tween_state()</a></code> where it gets all entering/exiting rows in one go, and not one-by-one</p></blockquote>
 <p>Our last option is to not match the polygons up, but simply say “make everything in the first state, into everything in the last state… somehow”. This involves cutting up polygons in the state with fewest polygons and match polygons by minimizing the distance and area difference between pairs. All of this is controlled by setting <code>match = FALSE</code> in <code><a href="reference/tween_polygon.html">tween_polygon()</a></code>, and <code>transformr</code> will then do its magic:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_polygon.html">tween_polygon</a></span><span class="op">(</span><span class="va">star</span>, <span class="va">circles</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span>, <span class="va">id</span>, match <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>
-
-<span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">polyplot</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_polygon.html">tween_polygon</a></span><span class="op">(</span><span class="va">star</span>, <span class="va">circles</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span>, <span class="va">id</span>, match <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html" class="external-link">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">polyplot</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-4.gif"></p>
 </div>
-<div id="paths" class="section level3">
-<h3 class="hasAnchor">
-<a href="#paths" class="anchor"></a>Paths</h3>
+<div class="section level3">
+<h3 id="paths">Paths<a class="anchor" aria-label="anchor" href="#paths"></a>
+</h3>
 <p>Paths are a lot like polygons, except that they don’t <em>wrap-around</em>. Still, slight differences in how they are tweened exists. Chief among these are that the winding order are not changed to minimize the travel-distance, because paths often have an implicit direction and this should not be tampered with. Further, when automatic matching paths (that is, <code>match = FALSE</code>), paths are matched to minimize the difference in length as well as the pair distance. The same interpretation of the <code>enter</code>, <code>exit</code>, and <code>match</code> arguments remain, which can be seen in the two examples below:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">pathplot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span> 
-    <span class="fu">geom_path</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, group <span class="op">=</span> <span class="va">id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span>
-    <span class="fu">coord_fixed</span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span><span class="op">)</span><span class="op">)</span>
-  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span>
-<span class="op">}</span>
-<span class="va">spiral</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">path_spiral</a></span><span class="op">(</span><span class="op">)</span>
-<span class="va">waves</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">path_waves</a></span><span class="op">(</span><span class="op">)</span>
-
-<span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_path.html">tween_path</a></span><span class="op">(</span><span class="va">spiral</span>, <span class="va">waves</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span>, <span class="va">id</span>, enter <span class="op">=</span> <span class="va">from_below</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>
-
-<span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">pathplot</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">pathplot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_path</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span><span class="va">x</span>, <span class="va">y</span>, group <span class="op">=</span> <span class="va">id</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>    <span class="fu">coord_fixed</span><span class="op">(</span>xlim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span><span class="op">)</span>, ylim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1.5</span>, <span class="fl">1.5</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">spiral</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">path_spiral</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">waves</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">path_waves</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_path.html">tween_path</a></span><span class="op">(</span><span class="va">spiral</span>, <span class="va">waves</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span>, <span class="va">id</span>, enter <span class="op">=</span> <span class="va">from_below</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html" class="external-link">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">pathplot</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-5.gif"></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_path.html">tween_path</a></span><span class="op">(</span><span class="va">spiral</span>, <span class="va">waves</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span>, <span class="va">id</span>, match <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>
-
-<span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">pathplot</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_path.html">tween_path</a></span><span class="op">(</span><span class="va">spiral</span>, <span class="va">waves</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span>, <span class="va">id</span>, match <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html" class="external-link">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">pathplot</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-6.gif"></p>
 </div>
-<div id="simple-features" class="section level3">
-<h3 class="hasAnchor">
-<a href="#simple-features" class="anchor"></a>Simple features</h3>
-<p>The <code>sf</code> package provides an implemention of simple features which are a way to encode any type of geometry in defined classes and operate on them. <code>transformr</code> supports (multi)point, (multi)linestring, and (multi)polygon geometries which acount for most of the use cases. When using the <code><a href="reference/tween_sf.html">tween_sf()</a></code> function any <code>sfc</code> column will be tweened by itself, while the rest will be tweened by <code><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html">tweenr::tween_state()</a></code>. For any <em>multi</em> type, the tweening progress as if <code>match = FALSE</code> in <code><a href="reference/tween_polygon.html">tween_polygon()</a></code> and <code><a href="reference/tween_path.html">tween_path()</a></code>, that is polygons/paths are cut and matched to even out the two states. For multipoint the most central points are replicated to ensure the same number of points in each state. One nice thing about <code>sf</code> is that you can encode different geometry types in the same data.frame and plot it all at once:</p>
+<div class="section level3">
+<h3 id="simple-features">Simple features<a class="anchor" aria-label="anchor" href="#simple-features"></a>
+</h3>
+<p>The <code>sf</code> package provides an implemention of simple features which are a way to encode any type of geometry in defined classes and operate on them. <code>transformr</code> supports (multi)point, (multi)linestring, and (multi)polygon geometries which acount for most of the use cases. When using the <code><a href="reference/tween_sf.html">tween_sf()</a></code> function any <code>sfc</code> column will be tweened by itself, while the rest will be tweened by <code><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html" class="external-link">tweenr::tween_state()</a></code>. For any <em>multi</em> type, the tweening progress as if <code>match = FALSE</code> in <code><a href="reference/tween_polygon.html">tween_polygon()</a></code> and <code><a href="reference/tween_path.html">tween_path()</a></code>, that is polygons/paths are cut and matched to even out the two states. For multipoint the most central points are replicated to ensure the same number of points in each state. One nice thing about <code>sf</code> is that you can encode different geometry types in the same data.frame and plot it all at once:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">sfplot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span>
-  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span> 
-    <span class="fu">geom_sf</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>colour <span class="op">=</span> <span class="va">col</span>, geometry <span class="op">=</span> <span class="va">geometry</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> 
-    <span class="fu">coord_sf</span><span class="op">(</span>datum <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span> <span class="co"># remove graticule</span>
-    <span class="fu">scale_colour_identity</span><span class="op">(</span><span class="op">)</span>
-  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html">plot</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span>
-<span class="op">}</span>
-<span class="va">star_hole</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">poly_star_hole</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">circles</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">poly_circles</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">spiral</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">path_spiral</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">waves</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">path_waves</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">random</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">point_random</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">point_grid</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">df1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>
-  geo <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">star_hole</span>, <span class="va">spiral</span>, <span class="va">random</span><span class="op">)</span>,
-  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'steelblue'</span>, <span class="st">'forestgreen'</span>, <span class="st">'goldenrod'</span><span class="op">)</span>
-<span class="op">)</span>
-<span class="va">df2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html">data.frame</a></span><span class="op">(</span>
-  geo <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html">st_sfc</a></span><span class="op">(</span><span class="va">circles</span>, <span class="va">waves</span>, <span class="va">grid</span><span class="op">)</span>,
-  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">'goldenrod'</span>, <span class="st">'firebrick'</span>, <span class="st">'steelblue'</span><span class="op">)</span>
-<span class="op">)</span>
-
-<span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_sf.html">tween_sf</a></span><span class="op">(</span><span class="va">df1</span>, <span class="va">df2</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span><span class="op">)</span> <span class="op">%&gt;%</span> 
-  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span>
-
-<span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">sfplot</span><span class="op">)</span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">sfplot</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">ggplot</span><span class="op">(</span><span class="va">data</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">geom_sf</span><span class="op">(</span><span class="fu">aes</span><span class="op">(</span>colour <span class="op">=</span> <span class="va">col</span>, geometry <span class="op">=</span> <span class="va">geometry</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>    <span class="fu">coord_sf</span><span class="op">(</span>datum <span class="op">=</span> <span class="cn">NA</span><span class="op">)</span> <span class="op">+</span> <span class="co"># remove graticule</span></span>
+<span>    <span class="fu">scale_colour_identity</span><span class="op">(</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">p</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span><span class="va">star_hole</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">poly_star_hole</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">circles</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">poly_circles</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">spiral</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">path_spiral</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">waves</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">path_waves</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">random</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">point_random</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">grid</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/simple_shapes.html">point_grid</a></span><span class="op">(</span>st <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">df1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  geo <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html" class="external-link">st_sfc</a></span><span class="op">(</span><span class="va">star_hole</span>, <span class="va">spiral</span>, <span class="va">random</span><span class="op">)</span>,</span>
+<span>  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'steelblue'</span>, <span class="st">'forestgreen'</span>, <span class="st">'goldenrod'</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">df2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
+<span>  geo <span class="op">=</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/sfc.html" class="external-link">st_sfc</a></span><span class="op">(</span><span class="va">circles</span>, <span class="va">waves</span>, <span class="va">grid</span><span class="op">)</span>,</span>
+<span>  col <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'goldenrod'</span>, <span class="st">'firebrick'</span>, <span class="st">'steelblue'</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_sf.html">tween_sf</a></span><span class="op">(</span><span class="va">df1</span>, <span class="va">df2</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html" class="external-link">keep_state</a></span><span class="op">(</span><span class="fl">10</span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">sfplot</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-7.gif"></p>
 </div>
 </div>
@@ -215,51 +208,59 @@
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Download from CRAN at <br><a href="https://cloud.r-project.org/package=transformr">https://​cloud.r-project.org/​package=transformr</a>
-</li>
-<li>Browse source code at <br><a href="https://github.com/thomasp85/transformr/">https://​github.com/​thomasp85/​transformr/​</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/thomasp85/transformr/issues">https://​github.com/​thomasp85/​transformr/​issues</a>
-</li>
-</ul>
-</div>
-<div class="license">
-<h2>License</h2>
-<ul class="list-unstyled">
-<li>
-<a href="https://opensource.org/licenses/mit-license.php">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a>
-</li>
-</ul>
-</div>
-<div class="developers">
-<h2>Developers</h2>
-<ul class="list-unstyled">
-<li>Thomas Lin Pedersen <br><small class="roles"> Maintainer, author </small> <a href="https://orcid.org/0000-0002-5147-4711" target="orcid.widget" aria-label="ORCID"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li><a href="https://cloud.r-project.org/package=transformr" class="external-link">View on CRAN</a></li>
+<li><a href="https://github.com/thomasp85/transformr/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/thomasp85/transformr/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
+<div class="license">
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
-<li><a href="https://travis-ci.org/thomasp85/transformr"><img src="https://travis-ci.org/thomasp85/transformr.svg?branch=master" alt="Travis-CI Build Status"></a></li>
-<li><a href="https://ci.appveyor.com/project/thomasp85/transformr"><img src="https://ci.appveyor.com/api/projects/status/github/thomasp85/transformr?branch=master&amp;svg=true" alt="AppVeyor Build Status"></a></li>
-<li><a href="https://cran.r-project.org/package=transformr"><img src="https://www.r-pkg.org/badges/version-ago/transformr" alt="CRAN_Status_Badge"></a></li>
-<li><a href="https://cran.r-project.org/package=transformr"><img src="https://cranlogs.r-pkg.org/badges/grand-total/transformr" alt="CRAN_Download_Badge"></a></li>
-<li><a href="https://codecov.io/github/thomasp85/transformr?branch=master"><img src="https://img.shields.io/codecov/c/github/thomasp85/transformr/master.svg" alt="Coverage Status"></a></li>
+<li>
+<a href="https://opensource.org/licenses/mit-license.php" class="external-link">MIT</a> + file <a href="LICENSE-text.html">LICENSE</a>
+</li>
 </ul>
 </div>
+
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing transformr</a></li>
+</ul>
 </div>
+
+<div class="developers">
+<h2 data-toc-skip>Developers</h2>
+<ul class="list-unstyled">
+<li>Thomas Lin Pedersen <br><small class="roles"> Maintainer, author </small> <a href="https://orcid.org/0000-0002-5147-4711" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+</ul>
+</div>
+
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/thomasp85/transformr/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/thomasp85/transformr/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
+<li><a href="https://cran.r-project.org/package=transformr" class="external-link"><img src="https://www.r-pkg.org/badges/version-ago/transformr" alt="CRAN_Status_Badge"></a></li>
+<li><a href="https://cran.r-project.org/package=transformr" class="external-link"><img src="https://cranlogs.r-pkg.org/badges/grand-total/transformr" alt="CRAN_Download_Badge"></a></li>
+</ul>
+</div>
+
+  </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Thomas Lin Pedersen.</p>
+  <p></p>
+<p>Developed by Thomas Lin Pedersen.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>
@@ -267,6 +268,8 @@
 
   
 
+
+  
 
   </body>
 </html>
