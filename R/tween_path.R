@@ -110,7 +110,7 @@ make_paths <- function(x) {
   lapply(split(x, x$.id), to_path)
 }
 to_path <- function(path) {
-  gaps <- which(is.na(path$x))
+  gaps <- which(is.na(path$x) | is.na(path$y))
   if (length(gaps) == 0) {
     path <- list(path)
   } else {
