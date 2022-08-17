@@ -5,11 +5,9 @@
 
 <!-- badges: start -->
 
-[![R-CMD-check](https://github.com/thomasp85/transformr/workflows/R-CMD-check/badge.svg)](https://github.com/thomasp85/transformr/actions)
-[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version-ago/transformr)](https://cran.r-project.org/package=transformr)
-[![CRAN\_Download\_Badge](https://cranlogs.r-pkg.org/badges/grand-total/transformr)](https://cran.r-project.org/package=transformr)
-[![Codecov test
-coverage](https://codecov.io/gh/thomasp85/transformr/branch/master/graph/badge.svg)](https://codecov.io/gh/thomasp85/transformr?branch=master)
+[![R-CMD-check](https://github.com/thomasp85/transformr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/thomasp85/transformr/actions/workflows/R-CMD-check.yaml)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version-ago/transformr)](https://cran.r-project.org/package=transformr)
+[![CRAN_Download_Badge](https://cranlogs.r-pkg.org/badges/grand-total/transformr)](https://cran.r-project.org/package=transformr)
 <!-- badges: end -->
 
 If you’ve ever made animated data visualisations you’ll know that
