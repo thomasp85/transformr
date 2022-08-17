@@ -6,14 +6,9 @@
 \alias{transformr-package}
 \title{transformr: Polygon and Path Transformations}
 \description{
-\if{html}{\figure{logo.png}{options: align='right' alt='logo' width='120'}}
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-In order to smoothly animate the transformation of polygons and 
-    paths, many aspects needs to be taken into account, such as differing number 
-    of control points, changing center of rotation, etc. The 'transformr' 
-    package provides an extensive framework for manipulating the shapes of 
-    polygons and paths and can be seen as the spatial brother to the 'tweenr' 
-    package.
+In order to smoothly animate the transformation of polygons and paths, many aspects needs to be taken into account, such as differing number of control points, changing center of rotation, etc. The 'transformr' package provides an extensive framework for manipulating the shapes of polygons and paths and can be seen as the spatial brother to the 'tweenr' package.
 }
 \seealso{
 Useful links:
@@ -24,6 +19,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Thomas Lin Pedersen \email{thomasp85@gmail.com}
+\strong{Maintainer}: Thomas Lin Pedersen \email{thomasp85@gmail.com} (\href{https://orcid.org/0000-0002-5147-4711}{ORCID})
 
 }
+\keyword{internal}
