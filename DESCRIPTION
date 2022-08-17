@@ -18,7 +18,6 @@ Description: In order to smoothly animate the transformation of polygons and
 License: MIT + file LICENSE
 Encoding: UTF-8
 SystemRequirements: C++11
-LazyData: true
 Imports: 
     tweenr,
     rlang,
