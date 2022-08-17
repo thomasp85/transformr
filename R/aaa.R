@@ -50,6 +50,7 @@ add_points <- function(polygon, n, connect = TRUE) {
   new_polygon
 }
 
+#' @importFrom rlang as_function
 match_shapes <- function(from, to, enter, exit, min_n, closed = TRUE) {
   if (is.null(from)) {
     if (is.null(enter)) {
@@ -57,7 +58,7 @@ match_shapes <- function(from, to, enter, exit, min_n, closed = TRUE) {
       to <- from
     } else {
       from <- lapply(to, function(x) {
-        x <- enter(x)
+        x <- as_function(enter)(x)
         x$.phase <- 'enter'
         x
       })
@@ -68,7 +69,7 @@ match_shapes <- function(from, to, enter, exit, min_n, closed = TRUE) {
       from <- to
     } else {
       to <- lapply(from, function(x) {
-        x <- exit(x)
+        x <- as_function(exit)(x)
         x$.phase <- 'exit'
         x
       })
