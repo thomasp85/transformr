@@ -1,3 +1,13 @@
+find_splits <- function(lengths, n) {
+  find_splits_c(as.numeric(lengths), as.integer(n))
+}
+insert_points <- function(x, y, splits, n) {
+  insert_points_c(as.numeric(x), as.numeric(y), as.integer(splits), as.integer(n))
+}
+rotate <- function(poly_x, poly_y, ref_x, ref_y) {
+  rotate_c(as.numeric(poly_x), as.numeric(poly_y), as.numeric(ref_x), as.numeric(ref_y))
+}
+
 add_points <- function(polygon, n, connect = TRUE) {
   if (n < 1) {
     return(polygon)
@@ -109,4 +119,15 @@ common_id <- function(from, to) {
   from$.id <- match(from_id, all_id)
   to$.id <- match(to_id, all_id)
   list(from = from, to = to)
+}
+
+first <- function(x) x[[1]]
+`first<-` <- function(x, value) {
+  x[[1]] <- value
+  x
+}
+last <- function(x) x[[length(x)]]
+`last<-` <- function(x, value) {
+  x[[length(x)]] <- value
+  x
 }
