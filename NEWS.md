@@ -1,4 +1,4 @@
-# transformr (development version)
+# transformr 0.1.4
 
 * Support lambda functions in `enter` and `exit` arguments (#6)
 
