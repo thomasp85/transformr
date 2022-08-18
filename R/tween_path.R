@@ -35,7 +35,9 @@
 #' @importFrom tweenr .has_frames tween_state
 #' @export
 tween_path <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
-  stopifnot(is.data.frame(.data))
+  if (!is.data.frame(.data)) {
+    stop('`.data` must be a `data.frame`', call. = FALSE)
+  }
   from <- .get_last_frame(.data)
   id <- enquo(id)
   from$.id <- eval_tidy(id, from) %||% rep(1L, nrow(from))
@@ -46,7 +48,12 @@ tween_path <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit =
   paths <- align_paths(from, to, enter = enter, exit = exit, match = match)
   paths <- tween_state(paths$from, paths$to, ease = ease, nframes = nframes)
   paths <- paths[!paths$.frame %in% c(1, nframes), , drop = FALSE]
-  morph <- rbind(
+  if (is.character(paths$.id) || is.character(from$.id) || is.character(to$.id)) {
+    paths$.id <- as.character(paths$.id)
+    from$.id <- as.character(from$.id)
+    to$.id <- as.character(to$.id)
+  }
+  morph <- vec_rbind(
     if (nframes > 1) cbind(from, .frame = rep(1, nrow(from))) else NULL,
     paths,
     cbind(to, .frame = rep(nframes, nrow(to)))
@@ -73,8 +80,8 @@ align_paths <- function(from, to, min_n = 50, enter, exit, match) {
   )
   from <- lapply(paths, `[[`, 'from')
   id <- rep(seq_along(from), vapply(from, nrow, integer(1)))
-  from <- do.call(rbind, from)
-  to <- do.call(rbind, lapply(paths, `[[`, 'to'))
+  from <- vec_rbind(!!!from)
+  to <- vec_rbind(!!!lapply(paths, `[[`, 'to'))
   from$.id <- id
   to$.id <- id
   common_id(from = from, to = to)

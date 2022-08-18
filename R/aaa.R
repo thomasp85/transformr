@@ -79,8 +79,8 @@ match_shapes <- function(from, to, enter, exit, min_n, closed = TRUE) {
     from <- matched$from
     to <- matched$to
   }
-  from <- do.call(rbind, lapply(from, function(x) x[seq_len(nrow(x) + 1), ]))
-  to <- do.call(rbind, lapply(to, function(x) x[seq_len(nrow(x) + 1), ]))
+  from <- vec_rbind(!!!lapply(from, function(x) x[seq_len(nrow(x) + 1), ]))
+  to <- vec_rbind(!!!lapply(to, function(x) x[seq_len(nrow(x) + 1), ]))
   from <- from[-nrow(from), ]
   to <- to[-nrow(to), ]
   list(from = from, to = to)
@@ -93,8 +93,8 @@ match_polygon <- function(from, to, min_n) {
   if (nrow(main_to) < n_points) main_to <- add_points(main_to, n_points - nrow(main_to), connect = TRUE)
   offset <- rotate(main_to$x, main_to$y, main_from$x, main_from$y)
   to_end <- seq_len(nrow(main_to)) < offset
-  main_to <- rbind(main_to[!to_end, , drop = FALSE],
-                   main_to[to_end, , drop = FALSE])
+  main_to <- vec_rbind(main_to[!to_end, , drop = FALSE],
+                       main_to[to_end, , drop = FALSE])
   from[[1]] <- main_from
   to[[1]] <- main_to
   if (length(from) > 1 || length(to) > 1) {

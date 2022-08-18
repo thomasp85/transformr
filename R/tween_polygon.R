@@ -60,7 +60,9 @@
 #'   tween_polygon(circles, 'cubic-in-out', 20)
 #'
 tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = NULL, match = TRUE) {
-  stopifnot(is.data.frame(.data))
+  if (!is.data.frame(.data)) {
+    stop('`.data` must be a `data.frame`', call. = FALSE)
+  }
   from <- .get_last_frame(.data)
   id <- enquo(id)
   from$.id <- eval_tidy(id, from) %||% rep(1L, nrow(from))
@@ -71,7 +73,12 @@ tween_polygon <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exi
   polygons <- align_polygons(from, to, enter = enter, exit = exit, match = match)
   polygons <- tween_state(polygons$from, polygons$to, ease = ease, nframes = nframes)
   polygons <- polygons[!polygons$.frame %in% c(1, nframes), , drop = FALSE]
-  morph <- rbind(
+  if (is.character(polygons$.id) || is.character(from$.id) || is.character(to$.id)) {
+    polygons$.id <- as.character(polygons$.id)
+    from$.id <- as.character(from$.id)
+    to$.id <- as.character(to$.id)
+  }
+  morph <- vec_rbind(
     if (nframes > 1) cbind(from, .frame = rep(1, nrow(from))) else NULL,
     polygons,
     cbind(to, .frame = rep(nframes, nrow(to)))
@@ -98,8 +105,8 @@ align_polygons <- function(from, to, min_n = 50, enter, exit, match = TRUE) {
   )
   from <- lapply(polygons, `[[`, 'from')
   id <- rep(seq_along(from), vapply(from, nrow, integer(1)))
-  from <- do.call(rbind, from)
-  to <- do.call(rbind, lapply(polygons, `[[`, 'to'))
+  from <- vec_rbind(!!!from)
+  to <- vec_rbind(!!!lapply(polygons, `[[`, 'to'))
   from$.id <- id
   to$.id <- id
   common_id(from = from, to = to)
@@ -198,8 +205,8 @@ align_holes <- function(from, to) {
       if (nrow(to) < n_points) main_to <- add_points(to, n_points - nrow(to))
       offset <- rotate(to$x, to$y, from$x, from$y)
       to_end <- seq_len(nrow(to)) < offset
-      to <- rbind(to[!to_end, , drop = FALSE],
-                  to[to_end, , drop = FALSE])
+      to <- vec_rbind(to[!to_end, , drop = FALSE],
+                      to[to_end, , drop = FALSE])
     }
     list(from = from, to = to)
   }, from = from[-1], to = to[-1])
@@ -240,7 +247,7 @@ split_polygon <- function(polygon, n) {
     combined <- st_union(tiles[[smallest]], tiles[[neighbor]])
     tiles <- c(tiles[-c(smallest, neighbor)], list(combined))
   }
-  all_points <- do.call(rbind, polygon)
+  all_points <- vec_rbind(!!!polygon)
   id <- paste0(all_points$x, '-', all_points$y)
   lapply(tiles, function(t) {
     x <- t[[1]][-nrow(t[[1]]), 1]

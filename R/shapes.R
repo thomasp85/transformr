@@ -38,7 +38,7 @@ poly_circle <- function(st = FALSE, detail = 360) {
   if (st) {
     st_polygon(list(cbind(x, y)[c(seq_len(detail), 1), , drop = FALSE]))
   } else {
-    data.frame(x = x, y = y, id = 1L)
+    data_frame(x = x, y = y, id = 1L)
   }
 }
 #' @rdname simple_shapes
@@ -70,7 +70,7 @@ poly_circles <- function(st = FALSE, n = 3, r = 0.25, detail = 360) {
       list(cbind(d3$x, d3$y)[c(seq_len(360), 1), , drop = FALSE])
     ))
   } else {
-    rbind(d1,d2,d3)
+    vec_rbind(d1,d2,d3)
   }
 }
 #' @rdname simple_shapes
@@ -97,9 +97,9 @@ poly_star_hole <- function(st = FALSE, n = 5, r1 = 0.5) {
       cbind(d1$x, d1$y)[c(seq_len(n*2), 1), , drop = FALSE]
     ))
   } else {
-    rbind(
+    vec_rbind(
       d,
-      data.frame(x = NA, y = NA, id = 1L),
+      data_frame(x = NA, y = NA, id = 1L),
       d1
     )
   }
@@ -115,7 +115,7 @@ path_spiral <- function(st = FALSE, windings = 5) {
   if (st) {
     st_linestring(cbind(x, y))
   } else {
-    data.frame(x = x, y = y, id = 1L)
+    data_frame(x = x, y = y, id = 1L)
   }
 }
 #' @rdname simple_shapes
@@ -130,7 +130,7 @@ path_waves <- function(st = FALSE, w1 = 7, w2 = 11) {
       cbind(x, y2)
     ))
   } else {
-    data.frame(x = rep(x, 2), y = c(y1, y2), id = rep(c(1L, 2L), each = length(x)))
+    data_frame(x = rep(x, 2), y = c(y1, y2), id = rep(c(1L, 2L), each = length(x)))
   }
 }
 #' @rdname simple_shapes
@@ -143,7 +143,7 @@ point_random <- function(st = FALSE, n = 10) {
   if (st) {
     st_multipoint(cbind(x, y))
   } else {
-    data.frame(x = x, y = y, i = seq_len(n))
+    data_frame(x = x, y = y, i = seq_len(n))
   }
 }
 #' @rdname simple_shapes
@@ -155,6 +155,6 @@ point_grid <- function(st = FALSE, dim = 5) {
   if (st) {
     st_multipoint(cbind(x, y))
   } else {
-    data.frame(x = x, y = y, i = dim^2)
+    data_frame(x = x, y = y, i = seq_len(dim^2))
   }
 }

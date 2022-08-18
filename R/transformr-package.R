@@ -3,5 +3,6 @@
 
 ## usethis namespace: start
 #' @useDynLib transformr, .registration = TRUE
+#' @import vctrs
 ## usethis namespace: end
 NULL
