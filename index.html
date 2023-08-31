@@ -81,6 +81,7 @@
 <div class="page-header"><h1 id="transformr-">transformr <img src="reference/figures/logo.png" align="right"><a class="anchor" aria-label="anchor" href="#transformr-"></a>
 </h1></div>
 <!-- badges: start -->
+
 <p>If you’ve ever made animated data visualisations you’ll know that arbitrary polygons and lines requires special considerations if the animation is to be smooth and believable. <code>transformr</code> is able to remove all of these worries by expanding <a href="https://github.com/thomasp85/tweenr" class="external-link"><code>tweenr</code></a> to understand spatial data, and thus lets you focus on defining your animation steps. <code>transformr</code> takes care of matching shapes between states, cutting some in bits if the number doesn’t match between the states, and ensures that each pair of matched shapes contains the same number of anchor points and that these are paired up so as to avoid rotation and inversion during animation.</p>
 <p><code>transformr</code> supports both polygons (with holes), and paths either encoded as simple x/y data.frames or as simpel features using the <a href="https://github.com/r-spatial/sf" class="external-link"><code>sf</code></a> package.</p>
 <div class="section level2">
@@ -134,7 +135,9 @@
 <span><span class="va">ani</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/split.html" class="external-link">split</a></span><span class="op">(</span><span class="va">animation</span>, <span class="va">animation</span><span class="op">$</span><span class="va">.frame</span><span class="op">)</span>, <span class="va">polyplot</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-unnamed-chunk-3.gif"></p>
 <p>Similar to the <code>enter</code> function it is possible to supply an <code>exit</code> function when the start state has more polygons than the end state. These functions get a single polygon with the state it was/will be, that can then be manipulated at will, as long as the same number of rows and columns are returned.</p>
-<blockquote><p>The <code>enter</code> and <code>exit</code> functions have slightly different semantics here than in <code><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html" class="external-link">tweenr::tween_state()</a></code> where it gets all entering/exiting rows in one go, and not one-by-one</p></blockquote>
+<blockquote>
+<p>The <code>enter</code> and <code>exit</code> functions have slightly different semantics here than in <code><a href="https://rdrr.io/pkg/tweenr/man/tween_state.html" class="external-link">tweenr::tween_state()</a></code> where it gets all entering/exiting rows in one go, and not one-by-one</p>
+</blockquote>
 <p>Our last option is to not match the polygons up, but simply say “make everything in the first state, into everything in the last state… somehow”. This involves cutting up polygons in the state with fewest polygons and match polygons by minimizing the distance and area difference between pairs. All of this is controlled by setting <code>match = FALSE</code> in <code><a href="reference/tween_polygon.html">tween_polygon()</a></code>, and <code>transformr</code> will then do its magic:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">animation</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tween_polygon.html">tween_polygon</a></span><span class="op">(</span><span class="va">star</span>, <span class="va">circles</span>, <span class="st">'cubic-in-out'</span>, <span class="fl">40</span>, <span class="va">id</span>, match <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
@@ -260,7 +263,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
