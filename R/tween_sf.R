@@ -20,6 +20,7 @@
 #'
 #' @importFrom tweenr .complete_states .max_id .has_frames
 #' @importFrom rlang enquo
+#' @importFrom sf st_crs st_transform
 #' @export
 #'
 #' @examples
@@ -39,6 +40,25 @@ tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = N
   if (!is.data.frame(.data)) {
     stop('`.data` must be a `data.frame`', call. = FALSE)
   }
+  sf_columns <- vapply(.data, inherits, logical(1), 'sfc')
+  if (!any(sf_columns)) return(tween_state(.data, to, ease, nframes, !!id, enter, exit))
+
+  for (col in sf_columns) {
+    from_crs <- st_crs(.data[[col]])
+    to_crs <- st_crs(to[[col]])
+    if (is.na(from_crs)) {
+      if (!is.na(to_crs)) {
+        st_crs(.data[[col]]) <- to_crs
+      }
+      next
+    }
+    if (is.na(to_crs)) {
+      st_crs(to[[col]]) <- from_crs
+    } else {
+      to[[col]] <- st_transform(to[[col]], from_crs)
+    }
+  }
+
   from <- .get_last_frame(.data)
   from$.phase <- rep('raw', nrow(from))
   to$.phase <- rep('raw', nrow(to))
@@ -46,8 +66,9 @@ tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = N
   id <- enquo(id)
   if (.has_frames(.data)) nframes <- nframes + 1
 
+  # recalc to make sure .phase and .id columns are included
   sf_columns <- vapply(from, inherits, logical(1), 'sfc')
-  if (!any(sf_columns)) return(tween_state(.data, to, ease, nframes, !!id, enter, exit))
+
   full_set <- .complete_states(from, to, id, enter, exit, .max_id(.data))
   to$.id <- full_set$orig_to
   sf_from <- full_set$from[, sf_columns, drop = FALSE]
@@ -73,7 +94,7 @@ tween_sf_col <- function(from, to, ease, nframes) {
     tweened$id <- as.integer(tweened$id)
     tweened$sf_id <- as.integer(tweened$sf_id)
     tweened$.frame <- as.integer(tweened$.frame)
-    st_sfc(repack_sf(tweened, aligned$type, as.integer(nframes)))
+    st_sfc(repack_sf(tweened, aligned$type, as.integer(nframes)), crs = st_crs(from[[i]]))
   })
 }
 

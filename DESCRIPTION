@@ -29,7 +29,7 @@ Suggests:
     magrittr
 LinkingTo: 
     cpp11
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/thomasp85/transformr
 BugReports: https://github.com/thomasp85/transformr/issues
