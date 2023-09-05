@@ -43,7 +43,7 @@ tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = N
   sf_columns <- vapply(.data, inherits, logical(1), 'sfc')
   if (!any(sf_columns)) return(tween_state(.data, to, ease, nframes, !!id, enter, exit))
 
-  for (col in sf_columns) {
+  for (col in which(sf_columns)) {
     from_crs <- st_crs(.data[[col]])
     to_crs <- st_crs(to[[col]])
     if (is.na(from_crs)) {
