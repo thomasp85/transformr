@@ -78,6 +78,7 @@ tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = N
   morph <- tween_state(as.data.frame(full_set$from), as.data.frame(full_set$to), ease, nframes, id = NULL, enter, exit)
   morph[which(sf_columns)] <- tween_sf_col(sf_from, sf_to, rep(ease, length.out = ncol(from))[sf_columns], nframes)
   morph <- morph[!morph$.frame %in% c(1, nframes), , drop = FALSE]
+  if (nrow(morph) == 0) morph <- NULL
   morph <- vec_rbind(
     if (nframes > 1) cbind(as.data.frame(from), .frame = rep(1, nrow(from))) else NULL,
     morph,
@@ -90,6 +91,7 @@ tween_sf <- function(.data, to, ease, nframes, id = NULL, enter = NULL, exit = N
 tween_sf_col <- function(from, to, ease, nframes) {
   lapply(seq_along(from), function(i) {
     aligned <- align_sf(from[[i]], to[[i]])
+    if (is.null(aligned)) return(st_sfc(list()))
     tweened <- tween_state(aligned$from, aligned$to, ease, nframes)
     tweened$id <- as.integer(tweened$id)
     tweened$sf_id <- as.integer(tweened$sf_id)
@@ -99,7 +101,7 @@ tween_sf_col <- function(from, to, ease, nframes) {
 }
 
 align_sf <- function(from, to) {
-  if (length(from) == 0 && length(to) == 0) return(st_sfc(list()))
+  if (length(from) == 0 && length(to) == 0) return(NULL)
   from_type <- as.character(unlist(lapply(from, st_geometry_type)))
   if (!all(from_type %in% supp_types)) stop('Unsupported geometry type', call. = FALSE)
   to_type <- as.character(unlist(lapply(to, st_geometry_type)))
