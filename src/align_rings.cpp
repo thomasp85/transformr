@@ -25,7 +25,7 @@ cpp11::integers find_splits_c(cpp11::doubles lengths, int n) {
       splits[0] += n_remain;
       break;
     }
-    int split = std::round(n * lengths[j] / total);
+    int split = total == 0 ? n_remain : std::round(n * lengths[j] / total);
     if (split == 0) split = 1;
     split = split < n_remain ? split : n_remain;
     splits[j] = split;
