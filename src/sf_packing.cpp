@@ -127,9 +127,8 @@ cpp11::doubles make_point(cpp11::doubles &x, cpp11::doubles &y, std::vector< std
 }
 cpp11::writable::list make_path(cpp11::doubles &x, cpp11::doubles &y, std::vector< std::vector<int> > &start) {
   cpp11::writable::list res;
-  int i, j;
-  for (i = 0; i < start.size() - 1; ++i) {
-    for (j = 0; j < start[i].size(); ++j) {
+  for (size_t i = 0; i < start.size() - 1; ++i) {
+    for (size_t j = 0; j < start[i].size(); ++j) {
       int first = start[i][j];
       int last = j == start[i].size() - 1 ? start[i + 1][0] : start[i][j + 1] - 1;
       cpp11::writable::doubles_matrix<> path(last - first, 2);
@@ -149,15 +148,14 @@ cpp11::writable::list make_path(cpp11::doubles &x, cpp11::doubles &y, std::vecto
 cpp11::writable::list make_polygon(cpp11::doubles &x, cpp11::doubles &y, std::vector< std::vector<int> > &start) {
   cpp11::writable::list res;
 
-  int i, j, k;
-  for (i = 0; i < start.size() - 1; ++i) {
+  for (size_t i = 0; i < start.size() - 1; ++i) {
     cpp11::writable::list poly;
-    for (j = 0; j < start[i].size(); ++j) {
+    for (size_t j = 0; j < start[i].size(); ++j) {
       int first = start[i][j];
       int last = j == start[i].size() - 1 ? start[i + 1][0] : start[i][j + 1] - 1;
       cpp11::writable::doubles_matrix<> polygon(last - first + 1, 2);
       int row = 0;
-      for (k = first; k < last; ++k) {
+      for (int k = first; k < last; ++k) {
         polygon(row, 0) = x[k];
         polygon(row, 1) = y[k];
         row++;
