@@ -17,7 +17,6 @@ Description: In order to smoothly animate the transformation of polygons and
     package.
 License: MIT + file LICENSE
 Encoding: UTF-8
-SystemRequirements: C++11
 Imports: 
     tweenr,
     rlang,
@@ -29,7 +28,7 @@ Suggests:
     magrittr
 LinkingTo: 
     cpp11
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)
 URL: https://github.com/thomasp85/transformr
 BugReports: https://github.com/thomasp85/transformr/issues
