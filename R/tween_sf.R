@@ -20,7 +20,7 @@
 #'
 #' @importFrom tweenr .complete_states .max_id .has_frames
 #' @importFrom rlang enquo
-#' @importFrom sf st_crs st_transform
+#' @importFrom sf st_crs st_crs<- st_transform
 #' @export
 #'
 #' @examples
