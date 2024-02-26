@@ -1,4 +1,4 @@
-# transformr (development version)
+# transformr 0.1.5
 
 * Fix a bug in `tween_sf()` when tweening simple features with different crs
 
